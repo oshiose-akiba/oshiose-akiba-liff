@@ -23,32 +23,74 @@
         h1 {
             color: #ff69b4;
             text-align: center;
+            margin-bottom: 30px;
         }
         .profile {
             text-align: center;
-            margin-top: 20px;
+            margin-bottom: 30px;
         }
         .profile img {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
+            border: 3px solid #ff69b4;
         }
-        .info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-        }
-        .info p {
-            margin: 8px 0;
+        .profile h2 {
+            margin: 10px 0 5px 0;
             color: #333;
         }
-        .info strong {
+        .profile .role {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #ff69b4;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .profile .role.manager {
+            background: #6366f1;
+        }
+        .cast-info {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .cast-info p {
+            margin: 10px 0;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cast-info .label {
             color: #ff69b4;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .cast-info .value {
+            color: #333;
+            font-size: 16px;
         }
         .loading {
             text-align: center;
             color: #999;
+            padding: 40px 0;
+        }
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -56,49 +98,102 @@
     <div class="container">
         <h1>推し推せ AKIBA</h1>
         <div id="content" class="loading">読み込み中...</div>
+        <div class="footer">推し推せ AKIBA 業務アプリ v0.1</div>
     </div>
 
     <script>
-        // LIFF初期化
-        const LIFF_ID = '2010239964-vlVhNnKz';  // ←Iizukaさんの LIFF ID
+        // 設定
+        const LIFF_ID = '2010239964-vlVhNnKz';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxR-0pqKO-VCLUdxa5u2G98LSpyLox32X_4Sl36TyAhZAHyV58Na_xQ6MCkb44DmxYB_w/exec';  // ←ここ書き換え必要
 
         async function main() {
             try {
-                // LIFFを初期化
+                // LIFF初期化
                 await liff.init({ liffId: LIFF_ID });
 
-                // ログインしていない場合はログイン画面へ
+                // ログインしてない場合
                 if (!liff.isLoggedIn()) {
                     liff.login();
                     return;
                 }
 
-                // ユーザープロフィール取得
-                const profile = await liff.getProfile();
+                // LINE プロフィール取得
+                const lineProfile = await liff.getProfile();
+                const userId = lineProfile.userId;
 
-                // 画面に表示
-                document.getElementById('content').innerHTML = `
-                    <div class="profile">
-                        <img src="${profile.pictureUrl}" alt="profile">
-                        <h2>こんにちは、${profile.displayName} さん！</h2>
-                    </div>
-                    <div class="info">
-                        <p><strong>ユーザーID:</strong> ${profile.userId}</p>
-                        <p><strong>表示名:</strong> ${profile.displayName}</p>
-                        <p><strong>ステータスメッセージ:</strong> ${profile.statusMessage || '（未設定）'}</p>
-                    </div>
-                    <p style="text-align: center; margin-top: 30px; color: #666;">
-                        🎉 推し推せ AKIBA LIFF アプリが動いています！
-                    </p>
-                `;
-                document.getElementById('content').classList.remove('loading');
+                // GAS API でキャスト情報取得
+                const apiUrl = `${GAS_URL}?action=getCastInfo&userId=${userId}`;
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+
+                // 画面表示
+                if (result.success) {
+                    showCastInfo(lineProfile, result.data);
+                } else {
+                    showNotRegistered(lineProfile, result);
+                }
 
             } catch (error) {
-                document.getElementById('content').innerHTML = `
-                    <p style="color: red;">エラー: ${error.message}</p>
-                `;
-                console.error(error);
+                showError(error);
             }
+        }
+
+        function showCastInfo(lineProfile, castData) {
+            const roleLabel = castData.isManager ? '管理者' : 'キャスト';
+            const roleClass = castData.isManager ? 'role manager' : 'role';
+            
+            document.getElementById('content').innerHTML = `
+                <div class="profile">
+                    ${lineProfile.pictureUrl ? `<img src="${lineProfile.pictureUrl}" alt="profile">` : ''}
+                    <h2>こんにちは、${lineProfile.displayName} さん！</h2>
+                    <span class="${roleClass}">${roleLabel}</span>
+                </div>
+                <div class="cast-info">
+                    <p>
+                        <span class="label">キャスト名</span>
+                        <span class="value">${castData.name}</span>
+                    </p>
+                    <p>
+                        <span class="label">所属店舗</span>
+                        <span class="value">${castData.store}</span>
+                    </p>
+                    <p>
+                        <span class="label">キャストID</span>
+                        <span class="value">${castData.id}</span>
+                    </p>
+                </div>
+            `;
+            document.getElementById('content').classList.remove('loading');
+        }
+
+        function showNotRegistered(lineProfile, result) {
+            document.getElementById('content').innerHTML = `
+                <div class="profile">
+                    ${lineProfile.pictureUrl ? `<img src="${lineProfile.pictureUrl}" alt="profile">` : ''}
+                    <h2>${lineProfile.displayName} さん</h2>
+                </div>
+                <div class="error">
+                    キャスト名簿に登録されていません。<br>
+                    管理者にお問い合わせください。
+                </div>
+                <div class="cast-info">
+                    <p>
+                        <span class="label">LINE User ID</span>
+                        <span class="value" style="font-size: 10px; word-break: break-all;">${lineProfile.userId}</span>
+                    </p>
+                </div>
+            `;
+            document.getElementById('content').classList.remove('loading');
+        }
+
+        function showError(error) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    エラーが発生しました。<br>
+                    <small>${error.message || error}</small>
+                </div>
+            `;
+            document.getElementById('content').classList.remove('loading');
         }
 
         main();
