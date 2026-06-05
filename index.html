@@ -6,6 +6,7 @@
     <title>推し推せ AKIBA</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
+        * { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             margin: 0;
@@ -13,10 +14,7 @@
             background-color: #f5f5f5;
             color: #333;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        .container { max-width: 600px; margin: 0 auto; }
         h1 {
             color: #ff69b4;
             text-align: center;
@@ -31,11 +29,7 @@
             margin-bottom: 16px;
             text-align: center;
         }
-        .user-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 8px 0 4px 0;
-        }
+        .user-name { font-size: 18px; font-weight: bold; margin: 8px 0 4px 0; }
         .role {
             display: inline-block;
             padding: 3px 10px;
@@ -45,9 +39,7 @@
             font-size: 11px;
             font-weight: bold;
         }
-        .role.manager {
-            background: #6366f1;
-        }
+        .role.manager { background: #6366f1; }
         .section {
             background: white;
             padding: 16px;
@@ -72,31 +64,12 @@
             justify-content: space-between;
             align-items: center;
         }
-        .shift-item.leader {
-            background: #e6ffe6;
-            border-left: 4px solid #00cc00;
-        }
-        .shift-item.kabuki_help {
-            background: #ffe6f9;
-            border-left: 4px solid #ff00ff;
-        }
-        .shift-item.absent {
-            background: #ffe6e6;
-            border-left: 4px solid #ff0000;
-        }
-        .shift-item.late {
-            background: #f0e6ff;
-            border-left: 4px solid #9900ff;
-        }
-        .shift-date {
-            font-weight: bold;
-            font-size: 14px;
-            color: #333;
-        }
-        .shift-time {
-            color: #666;
-            font-size: 14px;
-        }
+        .shift-item.leader { background: #e6ffe6; border-left: 4px solid #00cc00; }
+        .shift-item.kabuki_help { background: #ffe6f9; border-left: 4px solid #ff00ff; }
+        .shift-item.absent { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .shift-item.late { background: #f0e6ff; border-left: 4px solid #9900ff; }
+        .shift-date { font-weight: bold; font-size: 14px; color: #333; }
+        .shift-time { color: #666; font-size: 14px; }
         .shift-tag {
             display: inline-block;
             padding: 2px 8px;
@@ -118,10 +91,7 @@
             font-size: 14px;
             color: #666;
         }
-        .summary strong {
-            color: #ff69b4;
-            font-size: 18px;
-        }
+        .summary strong { color: #ff69b4; font-size: 18px; }
         .day-group {
             margin-bottom: 10px;
             border: 1px solid #eee;
@@ -138,24 +108,11 @@
             font-weight: bold;
             user-select: none;
         }
-        .day-header:hover {
-            background: #ffe0f0;
-        }
-        .day-toggle {
-            transition: transform 0.2s;
-            color: #ff69b4;
-        }
-        .day-toggle.open {
-            transform: rotate(90deg);
-        }
-        .day-body {
-            display: none;
-            padding: 10px;
-            background: white;
-        }
-        .day-body.open {
-            display: block;
-        }
+        .day-header:hover { background: #ffe0f0; }
+        .day-toggle { transition: transform 0.2s; color: #ff69b4; }
+        .day-toggle.open { transform: rotate(90deg); }
+        .day-body { display: none; padding: 10px; background: white; }
+        .day-body.open { display: block; }
         .cast-line {
             padding: 6px 10px;
             margin: 2px 0;
@@ -165,11 +122,7 @@
             justify-content: space-between;
             font-size: 13px;
         }
-        .loading {
-            text-align: center;
-            color: #999;
-            padding: 40px 0;
-        }
+        .loading { text-align: center; color: #999; padding: 40px 0; }
         .error {
             background: #fee;
             border: 1px solid #fcc;
@@ -178,34 +131,159 @@
             border-radius: 8px;
             margin: 20px 0;
         }
-        .empty {
-            text-align: center;
-            color: #999;
-            padding: 20px;
-            font-size: 14px;
-        }
+        .empty { text-align: center; color: #999; padding: 20px; font-size: 14px; }
         .footer {
             text-align: center;
             margin: 20px 0 10px 0;
             color: #999;
             font-size: 11px;
         }
+
+        /* シフト希望提出 */
+        .deadline-info {
+            background: #fff5fa;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+        .deadline-info strong { color: #ff69b4; }
+        .warning-banner {
+            background: #d32f2f;
+            color: #fff;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .warning-banner.orange {
+            background: #ff9800;
+        }
+        .warning-banner .big { font-size: 16px; display: block; margin-bottom: 4px; }
+        .warning-banner .count {
+            background: #fff;
+            color: #d32f2f;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+        .warning-banner.orange .count { color: #ff9800; }
+        .day-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            gap: 6px;
+            border-bottom: 1px solid #eee;
+        }
+        .day-row:last-child { border-bottom: none; }
+        .day-row.weekend .day-text { color: #c00; }
+        .day-label {
+            width: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .day-text { font-size: 13px; font-weight: bold; }
+        .hours-tag {
+            font-size: 10px;
+            color: #856404;
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            align-self: flex-start;
+            white-space: nowrap;
+        }
+        .event-tag {
+            font-size: 10px;
+            color: #c2185b;
+            background: #fce4ec;
+            padding: 2px 5px;
+            border-radius: 3px;
+            align-self: flex-start;
+            white-space: nowrap;
+        }
+        .day-row select {
+            padding: 6px 4px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 0;
+            background: #fff;
+        }
+        .day-row .tilde { font-size: 13px; color: #666; }
+        .clear-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+            font-size: 11px;
+            padding: 5px 7px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .note-input {
+            width: 100%;
+            min-height: 70px;
+            padding: 8px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+            margin-top: 8px;
+        }
+        .note-label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 12px;
+            color: #333;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #06c755;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 16px;
+            cursor: pointer;
+        }
+        .submit-btn:disabled { background: #aaa; }
+        .msg {
+            text-align: center;
+            margin-top: 12px;
+            font-weight: bold;
+            min-height: 22px;
+            font-size: 13px;
+        }
+        .msg-ok { color: #06c755; }
+        .msg-err { color: #c00; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>推し推せ AKIBA</h1>
         <div id="content" class="loading">読み込み中...</div>
-        <div class="footer">推し推せ AKIBA 業務アプリ v0.2</div>
+        <div class="footer">推し推せ AKIBA 業務アプリ v0.3</div>
     </div>
 
     <script>
-        // 設定
         const LIFF_ID = '2010239964-vlVhNnKz';
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxR-0pqKO-VCLUdxa5u2G98LSpyLox32X_4Sl36TyAhZAHyV58Na_xQ6MCkb44DmxYB_w/exec';  // ←ここ書き換え必要
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxR-0pqKO-VCLUdxa5u2G98LSpyLox32X_4Sl36TyAhZAHyV58Na_xQ6MCkb44DmxYB_w/exec';
 
         let castData = null;
         let lineProfile = null;
+        let shiftRequestData = null;
 
         async function main() {
             try {
@@ -218,7 +296,6 @@
 
                 lineProfile = await liff.getProfile();
                 
-                // キャスト情報取得
                 const castInfoUrl = `${GAS_URL}?action=getCastInfo&userId=${lineProfile.userId}`;
                 const castResponse = await fetch(castInfoUrl);
                 const castResult = await castResponse.json();
@@ -230,7 +307,6 @@
 
                 castData = castResult.data;
 
-                // 管理者かキャストかで画面を切り替え
                 if (castData.isManager) {
                     await showManagerView();
                 } else {
@@ -242,35 +318,111 @@
             }
         }
 
-        // 管理者画面：全体シフト
         async function showManagerView() {
-            // 全体シフト取得
             const allShiftsUrl = `${GAS_URL}?action=getAllShifts`;
             const response = await fetch(allShiftsUrl);
             const result = await response.json();
 
+            let html = renderHeader(true);
+
             if (!result.success) {
-                showError(result.error || '全体シフトの取得に失敗しました');
-                return;
+                html += renderErrorSection('全体シフトの取得に失敗しました');
+            } else {
+                const akibaData = result.data.current.akiba;
+                
+                if (!akibaData || !akibaData.shiftsByDate) {
+                    html += `<div class="section"><div class="empty">シフトデータがありません</div></div>`;
+                } else {
+                    html += renderAllShiftsSection(akibaData);
+                }
             }
 
-            const akibaData = result.data.current.akiba;
+            // シフト希望提出セクション追加
+            html += renderShiftRequestSection();
+
+            document.getElementById('content').innerHTML = html;
+            document.getElementById('content').classList.remove('loading');
             
-            if (!akibaData || !akibaData.shiftsByDate) {
-                document.getElementById('content').innerHTML = renderHeader(true) + `
-                    <div class="section">
-                        <div class="empty">シフトデータがありません</div>
+            // シフト希望提出フォーム表示
+            await loadShiftRequestForm();
+        }
+
+        async function showCastView() {
+            const myShiftsUrl = `${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`;
+            const response = await fetch(myShiftsUrl);
+            const result = await response.json();
+
+            let html = renderHeader(false);
+
+            if (!result.success) {
+                html += renderErrorSection(result.error || 'シフトの取得に失敗しました');
+            } else {
+                html += renderMyShiftsSection(result.data);
+            }
+
+            // シフト希望提出セクション追加
+            html += renderShiftRequestSection();
+
+            document.getElementById('content').innerHTML = html;
+            document.getElementById('content').classList.remove('loading');
+            
+            // シフト希望提出フォーム表示
+            await loadShiftRequestForm();
+        }
+
+        function renderHeader(isManager) {
+            const roleLabel = isManager ? '管理者' : 'キャスト';
+            const roleClass = isManager ? 'role manager' : 'role';
+            return `
+                <div class="header-card">
+                    <div class="user-name">${castData.name} さん</div>
+                    <span class="${roleClass}">${roleLabel}</span>
+                    <div style="color: #999; font-size: 12px; margin-top: 6px;">${castData.store}</div>
+                </div>
+            `;
+        }
+
+        function renderMyShiftsSection(data) {
+            const shifts = data.current.shifts || [];
+            const sheetName = data.current.sheetName || '';
+
+            let html = `
+                <div class="section">
+                    <div class="section-title">📅 自分のシフト${sheetName ? '（' + sheetName + '）' : ''}</div>
+            `;
+
+            if (shifts.length === 0) {
+                html += `<div class="empty">今期のシフトはありません</div>`;
+            } else {
+                shifts.forEach(s => {
+                    const statusTag = getStatusTag(s.status);
+                    html += `
+                        <div class="shift-item ${s.status}">
+                            <div>
+                                <div class="shift-date">${s.date}</div>
+                                <div class="shift-time">${s.start} - ${s.end}</div>
+                            </div>
+                            ${statusTag}
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="summary">
+                        出勤数: <strong>${shifts.length}</strong>日
                     </div>
                 `;
-                document.getElementById('content').classList.remove('loading');
-                return;
             }
 
+            html += `</div>`;
+            return html;
+        }
+
+        function renderAllShiftsSection(akibaData) {
             const dates = Object.keys(akibaData.shiftsByDate);
             const totalShifts = dates.reduce((sum, d) => sum + akibaData.shiftsByDate[d].length, 0);
 
-            let html = renderHeader(true);
-            html += `
+            let html = `
                 <div class="section">
                     <div class="section-title">📅 全体シフト（${akibaData.sheetName}）</div>
                     <div class="summary">
@@ -303,69 +455,216 @@
             });
 
             html += `</div>`;
-            document.getElementById('content').innerHTML = html;
-            document.getElementById('content').classList.remove('loading');
+            return html;
         }
 
-        // 通常キャスト画面：自分のシフト
-        async function showCastView() {
-            // 自分のシフト取得
-            const myShiftsUrl = `${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`;
-            const response = await fetch(myShiftsUrl);
-            const result = await response.json();
-
-            if (!result.success) {
-                showError(result.error || 'シフトの取得に失敗しました');
-                return;
-            }
-
-            const shifts = result.data.current.shifts || [];
-            const sheetName = result.data.current.sheetName || '';
-
-            let html = renderHeader(false);
-            html += `
-                <div class="section">
-                    <div class="section-title">📅 自分のシフト${sheetName ? '（' + sheetName + '）' : ''}</div>
+        function renderShiftRequestSection() {
+            return `
+                <div class="section" id="shift-request-section">
+                    <div class="section-title">📝 シフト希望提出</div>
+                    <div id="shift-request-content" class="loading">読み込み中...</div>
+                </div>
             `;
+        }
 
-            if (shifts.length === 0) {
-                html += `<div class="empty">今期のシフトはありません</div>`;
-            } else {
-                shifts.forEach(s => {
-                    const statusTag = getStatusTag(s.status);
-                    html += `
-                        <div class="shift-item ${s.status}">
-                            <div>
-                                <div class="shift-date">${s.date}</div>
-                                <div class="shift-time">${s.start} - ${s.end}</div>
-                            </div>
-                            ${statusTag}
-                        </div>
-                    `;
-                });
+        function renderErrorSection(message) {
+            return `<div class="error">${message}</div>`;
+        }
 
+        async function loadShiftRequestForm() {
+            try {
+                const url = `${GAS_URL}?action=getShiftRequestForm&userId=${lineProfile.userId}`;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (!result.success) {
+                    document.getElementById('shift-request-content').innerHTML = 
+                        `<div class="error">${result.error || 'フォームの取得に失敗しました'}</div>`;
+                    return;
+                }
+
+                shiftRequestData = result.data;
+                renderShiftRequestForm();
+            } catch (error) {
+                document.getElementById('shift-request-content').innerHTML = 
+                    `<div class="error">エラー: ${error.message}</div>`;
+            }
+        }
+
+        function renderShiftRequestForm() {
+            const d = shiftRequestData;
+            let html = '';
+
+            // 警告バナー
+            if (d.isAfterDeadline) {
                 html += `
-                    <div class="summary">
-                        出勤数: <strong>${shifts.length}</strong>日
+                    <div class="warning-banner">
+                        <span class="big">⚠️ 提出期限を過ぎています ⚠️</span>
+                        提出は可能ですが、必ず期限内に提出するようお願いします
+                        ${d.castLateCount > 0 ? `<div class="count">これまで ${d.castLateCount} 回 遅れています</div>` : ''}
+                    </div>
+                `;
+            } else if (d.castLateCount > 0) {
+                html += `
+                    <div class="warning-banner orange">
+                        <span class="big">⚠️ 過去の提出遅延について</span>
+                        これまで <span class="count">${d.castLateCount} 回</span> 期限を過ぎて提出しています<br>
+                        今回は期限内に提出をお願いします
                     </div>
                 `;
             }
 
-            html += `</div>`;
-            document.getElementById('content').innerHTML = html;
-            document.getElementById('content').classList.remove('loading');
-        }
-
-        function renderHeader(isManager) {
-            const roleLabel = isManager ? '管理者' : 'キャスト';
-            const roleClass = isManager ? 'role manager' : 'role';
-            return `
-                <div class="header-card">
-                    <div class="user-name">${castData.name} さん</div>
-                    <span class="${roleClass}">${roleLabel}</span>
-                    <div style="color: #999; font-size: 12px; margin-top: 6px;">${castData.store}</div>
+            // 締切情報
+            html += `
+                <div class="deadline-info">
+                    対象: <strong>${d.period}</strong>分（${d.dates[0].label} 〜 ${d.dates[d.dates.length - 1].label}）<br>
+                    📅 締切: <strong>${d.deadlineLabel}</strong>
+                    <div style="font-size: 11px; color: #999; margin-top: 4px;">
+                        出勤しない日は「--」のままにしてください。締切までは何度でも修正可能です。
+                    </div>
                 </div>
             `;
+
+            // 日付ごとの入力欄
+            html += `<div id="shift-rows">`;
+            d.dates.forEach((date, i) => {
+                const existing = d.existingShifts[i] || '';
+                const parts = existing.split('-');
+                const startVal = parts[0] || '';
+                const endVal = parts[1] || '';
+
+                html += `
+                    <div class="day-row ${date.isWeekend ? 'weekend' : ''}">
+                        <div class="day-label">
+                            <span class="day-text">${date.label}</span>
+                            ${date.hours ? `<span class="hours-tag">${escapeHtml(date.hours)}</span>` : ''}
+                            ${date.event ? `<span class="event-tag">${escapeHtml(date.event)}</span>` : ''}
+                        </div>
+                        <select class="shift-start" data-idx="${i}">
+                            <option value="">--</option>
+                            ${d.timeOptions.map(t => `<option value="${t}" ${startVal === t ? 'selected' : ''}>${t}</option>`).join('')}
+                        </select>
+                        <span class="tilde">〜</span>
+                        <select class="shift-end" data-idx="${i}">
+                            <option value="">--</option>
+                            ${d.timeOptions.map(t => `<option value="${t}" ${endVal === t ? 'selected' : ''}>${t}</option>`).join('')}
+                        </select>
+                        <button type="button" class="clear-btn" onclick="clearShiftRow(${i})">×</button>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+
+            // 備考欄
+            html += `
+                <label class="note-label">備考（自由記入）</label>
+                <textarea class="note-input" id="shift-note" placeholder="例: 通院のため遅れる可能性あり、◯日は20時以降のみ可など">${escapeHtml(d.existingNote || '')}</textarea>
+                <div style="font-size: 11px; color: #888; margin-top: 4px;">伝えたいことがあれば自由に記入してください。</div>
+            `;
+
+            // 提出ボタン
+            html += `
+                <button class="submit-btn" id="shift-submit-btn" onclick="submitShiftRequest()">提出する</button>
+                <div class="msg" id="shift-submit-msg"></div>
+            `;
+
+            document.getElementById('shift-request-content').innerHTML = html;
+            document.getElementById('shift-request-content').classList.remove('loading');
+        }
+
+        function clearShiftRow(idx) {
+            document.querySelectorAll(`[data-idx="${idx}"]`).forEach(el => el.value = '');
+        }
+
+        async function submitShiftRequest() {
+            const starts = document.querySelectorAll('.shift-start');
+            const ends = document.querySelectorAll('.shift-end');
+            const shifts = [];
+
+            for (let i = 0; i < starts.length; i++) {
+                const s = starts[i].value;
+                const e = ends[i].value;
+                if ((s && !e) || (!s && e)) {
+                    showShiftMsg(`${i + 1}日目：開始時刻と終了時刻はセットで選択してください`, false);
+                    return;
+                }
+                if (s && e && toMinutes(s) >= toMinutes(e)) {
+                    showShiftMsg(`${i + 1}日目：終了時刻は開始時刻より後にしてください`, false);
+                    return;
+                }
+                shifts.push(s && e ? `${s}-${e}` : '');
+            }
+
+            // 確認ダイアログ
+            if (shiftRequestData.isAfterDeadline) {
+                const warn = '⚠️ 警告 ⚠️\n\n提出期限を過ぎています。\n\n今回の提出は遅刻として記録され、回数がカウントされます。\n\n本当に提出しますか？';
+                if (!confirm(warn)) return;
+            } else {
+                if (!confirm('この内容で提出しますか？')) return;
+            }
+
+            const btn = document.getElementById('shift-submit-btn');
+            btn.disabled = true;
+            btn.textContent = '送信中...';
+            showShiftMsg('送信中...', true);
+
+            try {
+                const note = document.getElementById('shift-note').value;
+                
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'submitShiftRequest',
+                        lineUserId: lineProfile.userId,
+                        period: shiftRequestData.period,
+                        shifts: shifts,
+                        note: note
+                    })
+                });
+
+                const result = await response.json();
+                
+                btn.disabled = false;
+                btn.textContent = '提出する';
+
+                if (result.success) {
+                    if (result.data.isAfterDeadline) {
+                        showShiftMsg('⚠️ 提出完了しました（締切後提出として記録されました）', true);
+                    } else {
+                        showShiftMsg('✓ 提出完了しました！', true);
+                    }
+                    // 提出後、データ再取得
+                    setTimeout(() => loadShiftRequestForm(), 1500);
+                } else {
+                    showShiftMsg('エラー: ' + (result.error || '送信に失敗しました'), false);
+                }
+            } catch (error) {
+                btn.disabled = false;
+                btn.textContent = '提出する';
+                showShiftMsg('エラー: ' + error.message, false);
+            }
+        }
+
+        function toMinutes(t) {
+            const [h, m] = t.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function showShiftMsg(text, ok) {
+            const msg = document.getElementById('shift-submit-msg');
+            msg.textContent = text;
+            msg.className = 'msg ' + (ok ? 'msg-ok' : 'msg-err');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         function getStatusTag(status) {
