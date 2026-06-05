@@ -9,69 +9,161 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             background-color: #f5f5f5;
+            color: #333;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
             color: #ff69b4;
             text-align: center;
-            margin-bottom: 30px;
+            margin: 0 0 16px 0;
+            font-size: 24px;
         }
-        .profile {
+        .header-card {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
             text-align: center;
-            margin-bottom: 30px;
         }
-        .profile img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid #ff69b4;
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 8px 0 4px 0;
         }
-        .profile h2 {
-            margin: 10px 0 5px 0;
-            color: #333;
-        }
-        .profile .role {
+        .role {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 3px 10px;
             background: #ff69b4;
             color: white;
-            border-radius: 20px;
-            font-size: 12px;
+            border-radius: 15px;
+            font-size: 11px;
             font-weight: bold;
         }
-        .profile .role.manager {
+        .role.manager {
             background: #6366f1;
         }
-        .cast-info {
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .section {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
         }
-        .cast-info p {
-            margin: 10px 0;
-            color: #333;
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff69b4;
+            margin: 0 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ffe0f0;
+        }
+        .shift-item {
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            background: #fafafa;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .cast-info .label {
-            color: #ff69b4;
+        .shift-item.leader {
+            background: #e6ffe6;
+            border-left: 4px solid #00cc00;
+        }
+        .shift-item.kabuki_help {
+            background: #ffe6f9;
+            border-left: 4px solid #ff00ff;
+        }
+        .shift-item.absent {
+            background: #ffe6e6;
+            border-left: 4px solid #ff0000;
+        }
+        .shift-item.late {
+            background: #f0e6ff;
+            border-left: 4px solid #9900ff;
+        }
+        .shift-date {
             font-weight: bold;
             font-size: 14px;
-        }
-        .cast-info .value {
             color: #333;
-            font-size: 16px;
+        }
+        .shift-time {
+            color: #666;
+            font-size: 14px;
+        }
+        .shift-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 6px;
+        }
+        .tag-leader { background: #00cc00; color: white; }
+        .tag-kabuki_help { background: #ff00ff; color: white; }
+        .tag-absent { background: #ff0000; color: white; }
+        .tag-late { background: #9900ff; color: white; }
+        .summary {
+            text-align: center;
+            margin: 16px 0;
+            padding: 12px;
+            background: #fff5fa;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        .summary strong {
+            color: #ff69b4;
+            font-size: 18px;
+        }
+        .day-group {
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .day-header {
+            padding: 10px 14px;
+            background: #fff5fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            user-select: none;
+        }
+        .day-header:hover {
+            background: #ffe0f0;
+        }
+        .day-toggle {
+            transition: transform 0.2s;
+            color: #ff69b4;
+        }
+        .day-toggle.open {
+            transform: rotate(90deg);
+        }
+        .day-body {
+            display: none;
+            padding: 10px;
+            background: white;
+        }
+        .day-body.open {
+            display: block;
+        }
+        .cast-line {
+            padding: 6px 10px;
+            margin: 2px 0;
+            background: #fafafa;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
         }
         .loading {
             text-align: center;
@@ -86,11 +178,17 @@
             border-radius: 8px;
             margin: 20px 0;
         }
+        .empty {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
         .footer {
             text-align: center;
-            margin-top: 30px;
+            margin: 20px 0 10px 0;
             color: #999;
-            font-size: 12px;
+            font-size: 11px;
         }
     </style>
 </head>
@@ -98,7 +196,7 @@
     <div class="container">
         <h1>推し推せ AKIBA</h1>
         <div id="content" class="loading">読み込み中...</div>
-        <div class="footer">推し推せ AKIBA 業務アプリ v0.1</div>
+        <div class="footer">推し推せ AKIBA 業務アプリ v0.2</div>
     </div>
 
     <script>
@@ -106,31 +204,37 @@
         const LIFF_ID = '2010239964-vlVhNnKz';
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbxR-0pqKO-VCLUdxa5u2G98LSpyLox32X_4Sl36TyAhZAHyV58Na_xQ6MCkb44DmxYB_w/exec';  // ←ここ書き換え必要
 
+        let castData = null;
+        let lineProfile = null;
+
         async function main() {
             try {
-                // LIFF初期化
                 await liff.init({ liffId: LIFF_ID });
 
-                // ログインしてない場合
                 if (!liff.isLoggedIn()) {
                     liff.login();
                     return;
                 }
 
-                // LINE プロフィール取得
-                const lineProfile = await liff.getProfile();
-                const userId = lineProfile.userId;
+                lineProfile = await liff.getProfile();
+                
+                // キャスト情報取得
+                const castInfoUrl = `${GAS_URL}?action=getCastInfo&userId=${lineProfile.userId}`;
+                const castResponse = await fetch(castInfoUrl);
+                const castResult = await castResponse.json();
 
-                // GAS API でキャスト情報取得
-                const apiUrl = `${GAS_URL}?action=getCastInfo&userId=${userId}`;
-                const response = await fetch(apiUrl);
-                const result = await response.json();
+                if (!castResult.success) {
+                    showNotRegistered(castResult);
+                    return;
+                }
 
-                // 画面表示
-                if (result.success) {
-                    showCastInfo(lineProfile, result.data);
+                castData = castResult.data;
+
+                // 管理者かキャストかで画面を切り替え
+                if (castData.isManager) {
+                    await showManagerView();
                 } else {
-                    showNotRegistered(lineProfile, result);
+                    await showCastView();
                 }
 
             } catch (error) {
@@ -138,49 +242,163 @@
             }
         }
 
-        function showCastInfo(lineProfile, castData) {
-            const roleLabel = castData.isManager ? '管理者' : 'キャスト';
-            const roleClass = castData.isManager ? 'role manager' : 'role';
+        // 管理者画面：全体シフト
+        async function showManagerView() {
+            // 全体シフト取得
+            const allShiftsUrl = `${GAS_URL}?action=getAllShifts`;
+            const response = await fetch(allShiftsUrl);
+            const result = await response.json();
+
+            if (!result.success) {
+                showError(result.error || '全体シフトの取得に失敗しました');
+                return;
+            }
+
+            const akibaData = result.data.current.akiba;
             
-            document.getElementById('content').innerHTML = `
-                <div class="profile">
-                    ${lineProfile.pictureUrl ? `<img src="${lineProfile.pictureUrl}" alt="profile">` : ''}
-                    <h2>こんにちは、${lineProfile.displayName} さん！</h2>
-                    <span class="${roleClass}">${roleLabel}</span>
-                </div>
-                <div class="cast-info">
-                    <p>
-                        <span class="label">キャスト名</span>
-                        <span class="value">${castData.name}</span>
-                    </p>
-                    <p>
-                        <span class="label">所属店舗</span>
-                        <span class="value">${castData.store}</span>
-                    </p>
-                    <p>
-                        <span class="label">キャストID</span>
-                        <span class="value">${castData.id}</span>
-                    </p>
-                </div>
+            if (!akibaData || !akibaData.shiftsByDate) {
+                document.getElementById('content').innerHTML = renderHeader(true) + `
+                    <div class="section">
+                        <div class="empty">シフトデータがありません</div>
+                    </div>
+                `;
+                document.getElementById('content').classList.remove('loading');
+                return;
+            }
+
+            const dates = Object.keys(akibaData.shiftsByDate);
+            const totalShifts = dates.reduce((sum, d) => sum + akibaData.shiftsByDate[d].length, 0);
+
+            let html = renderHeader(true);
+            html += `
+                <div class="section">
+                    <div class="section-title">📅 全体シフト（${akibaData.sheetName}）</div>
+                    <div class="summary">
+                        対象期間: ${dates.length}日 / 延べ出勤: <strong>${totalShifts}</strong>名
+                    </div>
             `;
+
+            dates.forEach((date, index) => {
+                const casts = akibaData.shiftsByDate[date];
+                if (casts.length === 0) return;
+
+                const dayId = `day-${index}`;
+                html += `
+                    <div class="day-group">
+                        <div class="day-header" onclick="toggleDay('${dayId}')">
+                            <span>${date} - ${casts.length}名</span>
+                            <span class="day-toggle" id="${dayId}-toggle">▶</span>
+                        </div>
+                        <div class="day-body" id="${dayId}-body">
+                `;
+                casts.forEach(c => {
+                    html += `
+                        <div class="cast-line">
+                            <span>${c.name}</span>
+                            <span style="color: #666;">${c.start} - ${c.end}</span>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+            });
+
+            html += `</div>`;
+            document.getElementById('content').innerHTML = html;
             document.getElementById('content').classList.remove('loading');
         }
 
-        function showNotRegistered(lineProfile, result) {
+        // 通常キャスト画面：自分のシフト
+        async function showCastView() {
+            // 自分のシフト取得
+            const myShiftsUrl = `${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`;
+            const response = await fetch(myShiftsUrl);
+            const result = await response.json();
+
+            if (!result.success) {
+                showError(result.error || 'シフトの取得に失敗しました');
+                return;
+            }
+
+            const shifts = result.data.current.shifts || [];
+            const sheetName = result.data.current.sheetName || '';
+
+            let html = renderHeader(false);
+            html += `
+                <div class="section">
+                    <div class="section-title">📅 自分のシフト${sheetName ? '（' + sheetName + '）' : ''}</div>
+            `;
+
+            if (shifts.length === 0) {
+                html += `<div class="empty">今期のシフトはありません</div>`;
+            } else {
+                shifts.forEach(s => {
+                    const statusTag = getStatusTag(s.status);
+                    html += `
+                        <div class="shift-item ${s.status}">
+                            <div>
+                                <div class="shift-date">${s.date}</div>
+                                <div class="shift-time">${s.start} - ${s.end}</div>
+                            </div>
+                            ${statusTag}
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="summary">
+                        出勤数: <strong>${shifts.length}</strong>日
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            document.getElementById('content').innerHTML = html;
+            document.getElementById('content').classList.remove('loading');
+        }
+
+        function renderHeader(isManager) {
+            const roleLabel = isManager ? '管理者' : 'キャスト';
+            const roleClass = isManager ? 'role manager' : 'role';
+            return `
+                <div class="header-card">
+                    <div class="user-name">${castData.name} さん</div>
+                    <span class="${roleClass}">${roleLabel}</span>
+                    <div style="color: #999; font-size: 12px; margin-top: 6px;">${castData.store}</div>
+                </div>
+            `;
+        }
+
+        function getStatusTag(status) {
+            const tags = {
+                leader: '<span class="shift-tag tag-leader">🟢 リーダー</span>',
+                kabuki_help: '<span class="shift-tag tag-kabuki_help">🟣 KABUKIヘルプ</span>',
+                absent: '<span class="shift-tag tag-absent">🔴 当日欠勤</span>',
+                late: '<span class="shift-tag tag-late">🟪 遅刻</span>',
+                normal: ''
+            };
+            return tags[status] || '';
+        }
+
+        function toggleDay(dayId) {
+            const body = document.getElementById(`${dayId}-body`);
+            const toggle = document.getElementById(`${dayId}-toggle`);
+            body.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
+        function showNotRegistered(result) {
             document.getElementById('content').innerHTML = `
-                <div class="profile">
-                    ${lineProfile.pictureUrl ? `<img src="${lineProfile.pictureUrl}" alt="profile">` : ''}
-                    <h2>${lineProfile.displayName} さん</h2>
+                <div class="header-card">
+                    <div class="user-name">${lineProfile.displayName} さん</div>
                 </div>
                 <div class="error">
                     キャスト名簿に登録されていません。<br>
                     管理者にお問い合わせください。
                 </div>
-                <div class="cast-info">
-                    <p>
-                        <span class="label">LINE User ID</span>
-                        <span class="value" style="font-size: 10px; word-break: break-all;">${lineProfile.userId}</span>
-                    </p>
+                <div class="section">
+                    <div style="font-size: 11px; color: #999; word-break: break-all;">
+                        LINE User ID: ${lineProfile.userId}
+                    </div>
                 </div>
             `;
             document.getElementById('content').classList.remove('loading');
