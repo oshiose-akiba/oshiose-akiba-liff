@@ -487,6 +487,108 @@
         .modal-btn.ok { background: #ff69b4; color: white; }
         .modal-btn.ok.green { background: #06c755; }
         .modal-btn.single { background: #ff69b4; color: white; }
+        /* ==================== お知らせ ==================== */
+.notice-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: #fff;
+    position: relative;
+}
+.notice-card.level-important {
+    border-left: 4px solid #ff9800;
+    background: #fffbf5;
+}
+.notice-card.level-urgent {
+    border-left: 4px solid #f44336;
+    background: #fff8f8;
+}
+.notice-card.level-normal {
+    border-left: 4px solid #ccc;
+}
+.notice-level-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+}
+.badge-normal { background: #eee; color: #666; }
+.badge-important { background: #fff3e0; color: #e65100; }
+.badge-urgent { background: #ffebee; color: #c62828; }
+.notice-body {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin-bottom: 6px;
+}
+.notice-meta {
+    font-size: 11px;
+    color: #aaa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.notice-delete-btn {
+    font-size: 11px;
+    color: #aaa;
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+.notice-delete-btn:hover { color: #f44336; border-color: #f44336; }
+.notice-post-form {
+    margin-bottom: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.notice-post-label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 4px;
+}
+.notice-post-select {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    margin-bottom: 10px;
+}
+.notice-post-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+.notice-post-textarea:focus, .notice-post-select:focus { border-color: #ff69b4; outline: none; }
+.notice-post-btn {
+    width: 100%;
+    padding: 10px;
+    background: #ff69b4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.notice-post-btn:disabled { background: #ccc; }
     </style>
 </head>
 <body>
@@ -641,7 +743,8 @@
                 await Promise.all([
                     loadHomeAndShift(),
                     loadBaseOrders(),
-                    loadChekis()
+                    loadChekis(),
+                    loadNotices() 
                 ]);
 
             } catch (error) {
@@ -708,24 +811,25 @@
 
             // サマリーカード（データロード後に更新）
             const html = `
-                <div class="header-card">
-                    <div class="user-name">${escapeHtml(castData.name)} さん</div>
-                    <span class="${roleClass}">${roleLabel}</span>
-                    <div style="color:#999;font-size:12px;margin-top:6px;">${escapeHtml(castData.store)}</div>
-                </div>
-                ${todayHtml}
-                <div class="home-summary-grid">
-                    <div class="home-summary-card" onclick="switchTab('base')">
-                        <div class="home-summary-num alert" id="home-base-count">-</div>
-                        <div class="home-summary-label">未対応 遠隔注文</div>
-                    </div>
-                    <div class="home-summary-card" onclick="switchTab('cheki')">
-                        <div class="home-summary-num" id="home-cheki-count" style="color:#2196f3;">-</div>
-                        <div class="home-summary-label">対応中 宿題チェキ</div>
-                    </div>
-                </div>
-                <div class="footer">推し推せ AKIBA 業務アプリ v0.7</div>
-            `;
+    <div class="header-card">
+        <div class="user-name">${escapeHtml(castData.name)} さん</div>
+        <span class="${roleClass}">${roleLabel}</span>
+        <div style="color:#999;font-size:12px;margin-top:6px;">${escapeHtml(castData.store)}</div>
+    </div>
+    ${todayHtml}
+    <div class="home-summary-grid">
+        <div class="home-summary-card" onclick="switchTab('base')">
+            <div class="home-summary-num alert" id="home-base-count">-</div>
+            <div class="home-summary-label">未対応 遠隔注文</div>
+        </div>
+        <div class="home-summary-card" onclick="switchTab('cheki')">
+            <div class="home-summary-num" id="home-cheki-count" style="color:#2196f3;">-</div>
+            <div class="home-summary-label">対応中 宿題チェキ</div>
+        </div>
+    </div>
+    <div id="notices-area"></div>
+    <div class="footer">推し推せ AKIBA 業務アプリ v0.8</div>
+`;
 
             document.getElementById('home-content').innerHTML = html;
             document.getElementById('home-content').classList.remove('loading');
@@ -1243,6 +1347,130 @@
             document.getElementById(`${dayId}-toggle`).classList.toggle('open');
         }
 
+// ==========================================
+// お知らせ
+// ==========================================
+async function loadNotices() {
+    try {
+        const result = await fetch(`${GAS_URL}?action=getNotices`).then(r => r.json());
+        if (!result.success) return;
+        renderNotices(result.data);
+    } catch (e) {
+        // お知らせ取得失敗はサイレントに
+    }
+}
+
+function renderNotices(notices) {
+    const area = document.getElementById('notices-area');
+    if (!area) return;
+
+    const isManager = castData && castData.isManager;
+
+    let html = '';
+
+    // 管理者は投稿フォームを表示
+    if (isManager) {
+        html += `
+            <div class="notice-post-form">
+                <div class="section-title" style="margin-bottom:12px;">📢 お知らせ投稿</div>
+                <label class="notice-post-label">重要度</label>
+                <select class="notice-post-select" id="notice-level">
+                    <option value="通常">通常</option>
+                    <option value="重要">重要</option>
+                    <option value="緊急">緊急</option>
+                </select>
+                <label class="notice-post-label">本文</label>
+                <textarea class="notice-post-textarea" id="notice-body" placeholder="お知らせ内容を入力してください"></textarea>
+                <button class="notice-post-btn" id="notice-post-btn" onclick="postNotice()">投稿する</button>
+                <div class="msg" id="notice-post-msg" style="margin-top:8px;"></div>
+            </div>
+        `;
+    }
+
+    if (notices.length === 0) {
+        html += `<div class="empty" style="background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:16px;">お知らせはありません</div>`;
+    } else {
+        notices.forEach(n => { html += renderNoticeCard(n, isManager); });
+    }
+
+    area.innerHTML = html;
+}
+
+function renderNoticeCard(notice, isManager) {
+    const levelClass = notice.level === '緊急' ? 'level-urgent'
+                     : notice.level === '重要' ? 'level-important'
+                     : 'level-normal';
+    const badgeClass = notice.level === '緊急' ? 'badge-urgent'
+                     : notice.level === '重要' ? 'badge-important'
+                     : 'badge-normal';
+    const deleteBtn = isManager
+        ? `<button class="notice-delete-btn" onclick="deleteNotice(${notice.rowIndex})">削除</button>`
+        : '';
+    return `
+        <div class="notice-card ${levelClass}" id="notice-card-${notice.rowIndex}">
+            <span class="notice-level-badge ${badgeClass}">${escapeHtml(notice.level)}</span>
+            <div class="notice-body">${escapeHtml(notice.body)}</div>
+            <div class="notice-meta">
+                <span>${escapeHtml(notice.postedAt)} ${escapeHtml(notice.postedBy)}</span>
+                ${deleteBtn}
+            </div>
+        </div>
+    `;
+}
+
+async function postNotice() {
+    const level = document.getElementById('notice-level').value;
+    const body = document.getElementById('notice-body').value.trim();
+    const msgEl = document.getElementById('notice-post-msg');
+    const btn = document.getElementById('notice-post-btn');
+
+    if (!body) { msgEl.textContent = '本文を入力してください'; msgEl.className = 'msg msg-err'; return; }
+
+    btn.disabled = true; btn.textContent = '投稿中...';
+    msgEl.textContent = '';
+
+    try {
+        const result = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'addNotice', userId: lineProfile.userId, level, body })
+        }).then(r => r.json());
+
+        btn.disabled = false; btn.textContent = '投稿する';
+
+        if (result.success) {
+            document.getElementById('notice-body').value = '';
+            msgEl.textContent = '✓ 投稿しました！'; msgEl.className = 'msg msg-ok';
+            await loadNotices();
+        } else {
+            msgEl.textContent = 'エラー: ' + (result.error || '失敗しました'); msgEl.className = 'msg msg-err';
+        }
+    } catch (e) {
+        btn.disabled = false; btn.textContent = '投稿する';
+        msgEl.textContent = 'エラー: ' + e.message; msgEl.className = 'msg msg-err';
+    }
+}
+
+async function deleteNotice(rowIndex) {
+    showModal('このお知らせを削除しますか？', async () => {
+        try {
+            const result = await fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'deleteNotice', userId: lineProfile.userId, rowIndex })
+            }).then(r => r.json());
+
+            if (result.success) {
+                await loadNotices();
+            } else {
+                showAlert('エラー: ' + (result.error || '失敗しました'));
+            }
+        } catch (e) {
+            showAlert('エラー: ' + e.message);
+        }
+    });
+}
+        
         function renderErrorSection(message) {
             return `<div class="error">${message}</div>`;
         }
