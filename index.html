@@ -10,17 +10,72 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             margin: 0;
-            padding: 16px;
+            padding: 0;
             background-color: #f5f5f5;
             color: #333;
+            padding-bottom: 70px; /* タブバー分の余白 */
         }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 600px; margin: 0 auto; padding: 16px; }
         h1 {
             color: #ff69b4;
             text-align: center;
             margin: 0 0 16px 0;
-            font-size: 24px;
+            font-size: 22px;
         }
+
+        /* ==================== タブバー ==================== */
+        .tab-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            z-index: 100;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        /* fixedはmax-widthが効かないので左右中央寄せ対応 */
+        @media (min-width: 600px) {
+            .tab-bar { left: 50%; transform: translateX(-50%); width: 600px; }
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px 6px;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 10px;
+            font-weight: bold;
+            border: none;
+            background: none;
+            position: relative;
+            transition: color 0.15s;
+        }
+        .tab-item.active { color: #ff69b4; }
+        .tab-item .tab-icon { font-size: 22px; margin-bottom: 2px; }
+        .tab-badge {
+            position: absolute;
+            top: 4px;
+            right: 12px;
+            background: #f44336;
+            color: white;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 1px 5px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* ==================== タブページ ==================== */
+        .tab-page { display: none; }
+        .tab-page.active { display: block; }
+
+        /* ==================== 共通カード ==================== */
         .header-card {
             background: white;
             padding: 16px;
@@ -29,7 +84,7 @@
             margin-bottom: 16px;
             text-align: center;
         }
-        .user-name { font-size: 18px; font-weight: bold; margin: 8px 0 4px 0; }
+        .user-name { font-size: 18px; font-weight: bold; margin: 4px 0; }
         .role {
             display: inline-block;
             padding: 3px 10px;
@@ -55,6 +110,47 @@
             padding-bottom: 8px;
             border-bottom: 2px solid #ffe0f0;
         }
+
+        /* ホームサマリー */
+        .home-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .home-summary-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 14px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .home-summary-card:active { background: #fff0f7; }
+        .home-summary-num {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff69b4;
+            line-height: 1.1;
+        }
+        .home-summary-num.alert { color: #f44336; }
+        .home-summary-num.ok { color: #06c755; }
+        .home-summary-label { font-size: 11px; color: #888; margin-top: 4px; }
+
+        /* 今日のシフト */
+        .today-shift-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+        .today-shift-title { font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: bold; }
+        .today-shift-body { font-size: 16px; font-weight: bold; color: #333; }
+        .today-shift-time { font-size: 20px; color: #ff69b4; font-weight: bold; }
+
+        /* ==================== シフト ==================== */
         .shift-item {
             padding: 10px 12px;
             margin-bottom: 6px;
@@ -121,22 +217,6 @@
             display: flex;
             justify-content: space-between;
             font-size: 13px;
-        }
-        .loading { text-align: center; color: #999; padding: 40px 0; }
-        .error {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c00;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        .empty { text-align: center; color: #999; padding: 20px; font-size: 14px; }
-        .footer {
-            text-align: center;
-            margin: 20px 0 10px 0;
-            color: #999;
-            font-size: 11px;
         }
 
         /* シフト希望提出 */
@@ -267,7 +347,7 @@
         .msg-ok { color: #06c755; }
         .msg-err { color: #c00; }
 
-        /* BASE注文管理 */
+        /* ==================== BASE ==================== */
         .base-tab-bar {
             display: flex;
             gap: 8px;
@@ -286,11 +366,7 @@
             color: #999;
             transition: all 0.15s;
         }
-        .base-tab.active {
-            border-color: #ff69b4;
-            background: #fff0f7;
-            color: #ff69b4;
-        }
+        .base-tab.active { border-color: #ff69b4; background: #fff0f7; color: #ff69b4; }
         .base-panel { display: none; }
         .base-panel.active { display: block; }
         .base-order-card {
@@ -301,23 +377,10 @@
             background: #fff;
             transition: all 0.3s;
         }
-        .base-order-card.pending-payment {
-            border-left: 4px solid #f44336;
-            background: #fff8f8;
-        }
-        .base-order-card.waiting {
-            border-left: 4px solid #ff9800;
-            background: #fffbf5;
-        }
-        .base-order-card.done {
-            border-left: 4px solid #ccc;
-            background: #f9f9f9;
-            opacity: 0.7;
-        }
-        .base-order-card.handled-anim {
-            opacity: 0;
-            transform: translateX(30px);
-        }
+        .base-order-card.pending-payment { border-left: 4px solid #f44336; background: #fff8f8; }
+        .base-order-card.waiting { border-left: 4px solid #ff9800; background: #fffbf5; }
+        .base-order-card.done { border-left: 4px solid #ccc; background: #f9f9f9; opacity: 0.7; }
+        .base-order-card.handled-anim { opacity: 0; transform: translateX(30px); }
         .base-order-meta {
             display: flex;
             justify-content: space-between;
@@ -325,34 +388,13 @@
             margin-bottom: 6px;
         }
         .base-order-id { font-size: 11px; color: #aaa; }
-        .base-payment-badge {
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
+        .base-payment-badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 10px; }
         .badge-unpaid { background: #ffebee; color: #c62828; }
         .badge-paid { background: #e8f5e9; color: #2e7d32; }
         .badge-cancel { background: #eeeeee; color: #757575; }
-        .base-order-product {
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        .base-order-sub {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 4px;
-        }
-        .base-order-note {
-            font-size: 12px;
-            color: #555;
-            background: #fffde7;
-            border-radius: 4px;
-            padding: 4px 8px;
-            margin-bottom: 8px;
-        }
+        .base-order-product { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 4px; }
+        .base-order-sub { font-size: 12px; color: #888; margin-bottom: 4px; }
+        .base-order-note { font-size: 12px; color: #555; background: #fffde7; border-radius: 4px; padding: 4px 8px; margin-bottom: 8px; }
         .base-handle-btn {
             width: 100%;
             padding: 10px;
@@ -363,27 +405,11 @@
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
         }
         .base-handle-btn:disabled { background: #ccc; cursor: default; }
-        .base-handle-btn.done-btn {
-            background: #e8f5e9;
-            color: #2e7d32;
-            font-size: 13px;
-        }
-        .base-pending-count {
-            display: inline-block;
-            background: #f44336;
-            color: white;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 1px 7px;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
+        .base-handle-btn.done-btn { background: #e8f5e9; color: #2e7d32; font-size: 13px; }
 
-        /* チェキ管理 */
+        /* ==================== チェキ ==================== */
         .cheki-add-btn {
             width: 100%;
             padding: 12px;
@@ -402,107 +428,45 @@
             padding: 12px;
             margin-bottom: 10px;
             background: #fff;
-            transition: all 0.3s;
         }
         .cheki-card.status-working { border-left: 4px solid #ff9800; background: #fffbf5; }
         .cheki-card.status-boxed { border-left: 4px solid #2196f3; background: #f5fbff; }
         .cheki-card.status-done { border-left: 4px solid #ccc; background: #f9f9f9; opacity: 0.7; }
-        .cheki-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-        .cheki-customer {
-            font-size: 15px;
-            font-weight: bold;
-            color: #333;
-        }
-        .cheki-status-badge {
-            font-size: 11px;
-            font-weight: bold;
-            padding: 3px 10px;
-            border-radius: 10px;
-        }
+        .cheki-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .cheki-customer { font-size: 15px; font-weight: bold; color: #333; }
+        .cheki-status-badge { font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 10px; }
         .badge-working { background: #fff3e0; color: #e65100; }
         .badge-boxed { background: #e3f2fd; color: #1565c0; }
         .badge-done { background: #e8f5e9; color: #2e7d32; }
-        .cheki-meta {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 8px;
-        }
-        .cheki-note {
-            font-size: 12px;
-            color: #555;
-            background: #fffde7;
-            border-radius: 4px;
-            padding: 4px 8px;
-            margin-bottom: 8px;
-        }
-        .cheki-status-btns {
-            display: flex;
-            gap: 8px;
-        }
-        .cheki-status-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .cheki-meta { font-size: 12px; color: #888; margin-bottom: 8px; }
+        .cheki-note { font-size: 12px; color: #555; background: #fffde7; border-radius: 4px; padding: 4px 8px; margin-bottom: 8px; }
+        .cheki-status-btns { display: flex; gap: 8px; }
+        .cheki-status-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cheki-status-btn.btn-box { background: #e3f2fd; color: #1565c0; }
         .cheki-status-btn.btn-done { background: #e8f5e9; color: #2e7d32; }
         .cheki-status-btn:disabled { background: #eee; color: #aaa; cursor: default; }
-        .cheki-done-section {
-            margin-top: 14px;
-        }
-        .cheki-done-toggle {
-            font-size: 13px;
-            color: #aaa;
-            cursor: pointer;
-            text-align: center;
-            padding: 6px;
-            border: 1px solid #eee;
-            border-radius: 6px;
-            user-select: none;
-        }
+        .cheki-done-toggle { font-size: 13px; color: #aaa; cursor: pointer; text-align: center; padding: 6px; border: 1px solid #eee; border-radius: 6px; user-select: none; margin-top: 14px; }
         .cheki-done-toggle:hover { background: #f5f5f5; }
         .cheki-done-list { display: none; margin-top: 8px; }
         .cheki-done-list.open { display: block; }
-
-        /* チェキ登録フォーム */
-        .cheki-form { margin-top: 4px; }
-        .cheki-form-row {
-            margin-bottom: 12px;
-        }
-        .cheki-form-label {
-            display: block;
-            font-size: 12px;
-            font-weight: bold;
-            color: #666;
-            margin-bottom: 4px;
-        }
-        .cheki-form-input {
-            width: 100%;
-            padding: 9px 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-family: inherit;
-            background: #fff;
-        }
+        .cheki-form-row { margin-bottom: 12px; }
+        .cheki-form-label { display: block; font-size: 12px; font-weight: bold; color: #666; margin-bottom: 4px; }
+        .cheki-form-input { width: 100%; padding: 9px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; background: #fff; }
         .cheki-form-input:focus { border-color: #ff69b4; outline: none; }
 
-        /* カスタムモーダル */
+        /* ==================== 共通 ==================== */
+        .loading { text-align: center; color: #999; padding: 40px 0; }
+        .error { background: #fee; border: 1px solid #fcc; color: #c00; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .empty { text-align: center; color: #999; padding: 20px; font-size: 14px; }
+        .footer { text-align: center; margin: 20px 0 10px 0; color: #999; font-size: 11px; }
+
+        /* ==================== モーダル ==================== */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5);
-            z-index: 1000;
+            z-index: 200;
             align-items: center;
             justify-content: center;
         }
@@ -515,33 +479,10 @@
             max-width: 360px;
             text-align: center;
         }
-        .modal-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .modal-msg {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            text-align: left;
-        }
-        .modal-btns {
-            display: flex;
-            gap: 10px;
-        }
-        .modal-btn {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-        }
+        .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333; }
+        .modal-msg { font-size: 14px; color: #555; margin-bottom: 20px; white-space: pre-wrap; line-height: 1.6; text-align: left; }
+        .modal-btns { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 15px; font-weight: bold; border: none; cursor: pointer; }
         .modal-btn.cancel { background: #f0f0f0; color: #333; }
         .modal-btn.ok { background: #ff69b4; color: white; }
         .modal-btn.ok.green { background: #06c755; }
@@ -551,8 +492,52 @@
 <body>
     <div class="container">
         <h1>推し推せ AKIBA</h1>
-        <div id="content" class="loading">読み込み中...</div>
-        <div class="footer">推し推せ AKIBA 業務アプリ v0.6</div>
+
+        <!-- ホームタブ -->
+        <div class="tab-page active" id="page-home">
+            <div id="home-content" class="loading">読み込み中...</div>
+        </div>
+
+        <!-- シフトタブ -->
+        <div class="tab-page" id="page-shift">
+            <div id="shift-content" class="loading">読み込み中...</div>
+        </div>
+
+        <!-- 遠隔タブ -->
+        <div class="tab-page" id="page-base">
+            <div class="section">
+                <div class="section-title">📦 遠隔（BASE注文）<span id="base-pending-badge"></span></div>
+                <div id="base-content" class="loading">読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- チェキタブ -->
+        <div class="tab-page" id="page-cheki">
+            <div class="section">
+                <div class="section-title">📸 宿題チェキ管理</div>
+                <div id="cheki-content" class="loading">読み込み中...</div>
+            </div>
+        </div>
+
+        <div class="footer">推し推せ AKIBA 業務アプリ v0.7</div>
+    </div>
+
+    <!-- タブバー -->
+    <div class="tab-bar">
+        <button class="tab-item active" id="tab-home" onclick="switchTab('home')">
+            <span class="tab-icon">🏠</span>ホーム
+        </button>
+        <button class="tab-item" id="tab-shift" onclick="switchTab('shift')">
+            <span class="tab-icon">📅</span>シフト
+        </button>
+        <button class="tab-item" id="tab-base" onclick="switchTab('base')">
+            <span class="tab-icon">📦</span>遠隔
+            <span class="tab-badge" id="base-tab-badge" style="display:none;"></span>
+        </button>
+        <button class="tab-item" id="tab-cheki" onclick="switchTab('cheki')">
+            <span class="tab-icon">📸</span>チェキ
+            <span class="tab-badge" id="cheki-tab-badge" style="display:none;"></span>
+        </button>
     </div>
 
     <!-- カスタムモーダル -->
@@ -568,25 +553,23 @@
     <div class="modal-overlay" id="cheki-modal">
         <div class="modal-box" style="max-width:400px;">
             <div class="modal-title">📸 チェキ登録</div>
-            <div class="cheki-form">
-                <div class="cheki-form-row">
-                    <label class="cheki-form-label">お客様名 *</label>
-                    <input class="cheki-form-input" id="cheki-customer" type="text" placeholder="例: トマト🍅さん">
-                </div>
-                <div class="cheki-form-row">
-                    <label class="cheki-form-label">撮影日 *</label>
-                    <input class="cheki-form-input" id="cheki-shoot-date" type="date">
-                </div>
-                <div class="cheki-form-row">
-                    <label class="cheki-form-label">お渡し予定日 *</label>
-                    <input class="cheki-form-input" id="cheki-delivery-date" type="date">
-                </div>
-                <div class="cheki-form-row">
-                    <label class="cheki-form-label">備考（任意）</label>
-                    <input class="cheki-form-input" id="cheki-note" type="text" placeholder="例: 落書き3枚">
-                </div>
+            <div class="cheki-form-row">
+                <label class="cheki-form-label">お客様名 *</label>
+                <input class="cheki-form-input" id="cheki-customer" type="text" placeholder="例: トマト🍅さん">
             </div>
-            <div class="modal-btns" style="margin-top:8px;">
+            <div class="cheki-form-row">
+                <label class="cheki-form-label">撮影日 *</label>
+                <input class="cheki-form-input" id="cheki-shoot-date" type="date">
+            </div>
+            <div class="cheki-form-row">
+                <label class="cheki-form-label">お渡し予定日 *</label>
+                <input class="cheki-form-input" id="cheki-delivery-date" type="date">
+            </div>
+            <div class="cheki-form-row">
+                <label class="cheki-form-label">備考（任意）</label>
+                <input class="cheki-form-input" id="cheki-note" type="text" placeholder="例: 落書き3枚">
+            </div>
+            <div class="modal-btns" style="margin-top:12px;">
                 <button class="modal-btn cancel" onclick="closeChekiModal()">キャンセル</button>
                 <button class="modal-btn ok green" onclick="submitCheki()">登録する</button>
             </div>
@@ -601,11 +584,23 @@
         let castData = null;
         let lineProfile = null;
         let shiftRequestData = null;
+        let cachedShiftData = null;
+        let cachedBaseData = null;
+        let cachedChekiData = null;
 
         // ==========================================
-        // カスタムモーダル
+        // タブ切り替え
         // ==========================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`page-${tab}`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
 
+        // ==========================================
+        // モーダル
+        // ==========================================
         function showModal(msg, onOk, { title = '確認', okLabel = 'OK', cancelLabel = 'キャンセル', okGreen = false } = {}) {
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-msg').textContent = msg;
@@ -616,113 +611,186 @@
             `;
             const overlay = document.getElementById('custom-modal');
             overlay.classList.add('active');
-            document.getElementById('modal-ok-btn').onclick = () => {
-                overlay.classList.remove('active');
-                onOk();
-            };
-            document.getElementById('modal-cancel-btn').onclick = () => {
-                overlay.classList.remove('active');
-            };
+            document.getElementById('modal-ok-btn').onclick = () => { overlay.classList.remove('active'); onOk(); };
+            document.getElementById('modal-cancel-btn').onclick = () => { overlay.classList.remove('active'); };
         }
 
         function showAlert(msg, { title = 'エラー' } = {}) {
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-msg').textContent = msg;
-            const btns = document.getElementById('modal-btns');
-            btns.innerHTML = `<button class="modal-btn single" id="modal-single-btn">OK</button>`;
+            document.getElementById('modal-btns').innerHTML = `<button class="modal-btn single" id="modal-single-btn">OK</button>`;
             const overlay = document.getElementById('custom-modal');
             overlay.classList.add('active');
-            document.getElementById('modal-single-btn').onclick = () => {
-                overlay.classList.remove('active');
-            };
+            document.getElementById('modal-single-btn').onclick = () => { overlay.classList.remove('active'); };
         }
 
         // ==========================================
         // メイン
         // ==========================================
-
         async function main() {
             try {
                 await liff.init({ liffId: LIFF_ID });
                 if (!liff.isLoggedIn()) { liff.login(); return; }
 
                 lineProfile = await liff.getProfile();
-                const castInfoUrl = `${GAS_URL}?action=getCastInfo&userId=${lineProfile.userId}`;
-                const castResponse = await fetch(castInfoUrl);
-                const castResult = await castResponse.json();
-
-                if (!castResult.success) { showNotRegistered(castResult); return; }
+                const castResult = await fetch(`${GAS_URL}?action=getCastInfo&userId=${lineProfile.userId}`).then(r => r.json());
+                if (!castResult.success) { showNotRegistered(); return; }
                 castData = castResult.data;
 
-                if (castData.isManager) {
-                    await showManagerView();
-                } else {
-                    await showCastView();
-                }
+                // 並列でデータ取得
+                await Promise.all([
+                    loadHomeAndShift(),
+                    loadBaseOrders(),
+                    loadChekis()
+                ]);
+
             } catch (error) {
                 showError(error);
             }
         }
 
-        async function showManagerView() {
-            const allShiftsUrl = `${GAS_URL}?action=getAllShifts`;
-            const response = await fetch(allShiftsUrl);
-            const result = await response.json();
+        // ==========================================
+        // ホーム & シフト
+        // ==========================================
+        async function loadHomeAndShift() {
+            try {
+                const isManager = castData.isManager;
+                let shiftResult;
 
-            let html = renderHeader(true);
-            if (!result.success) {
-                html += renderErrorSection('全体シフトの取得に失敗しました');
-            } else {
-                const akibaData = result.data.current.akiba;
-                if (!akibaData || !akibaData.shiftsByDate) {
-                    html += `<div class="section"><div class="empty">シフトデータがありません</div></div>`;
+                if (isManager) {
+                    shiftResult = await fetch(`${GAS_URL}?action=getAllShifts`).then(r => r.json());
                 } else {
-                    html += renderAllShiftsSection(akibaData);
+                    shiftResult = await fetch(`${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`).then(r => r.json());
                 }
-            }
-            html += renderShiftRequestSection();
-            html += renderBaseSection();
-            html += renderChekiSection();
+                cachedShiftData = shiftResult;
 
-            document.getElementById('content').innerHTML = html;
-            document.getElementById('content').classList.remove('loading');
-            await loadShiftRequestForm();
-            await loadBaseOrders();
-            await loadChekis();
+                renderHome();
+                renderShiftTab(isManager);
+                await loadShiftRequestForm();
+
+            } catch (e) {
+                document.getElementById('home-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
+            }
         }
 
-        async function showCastView() {
-            const myShiftsUrl = `${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`;
-            const response = await fetch(myShiftsUrl);
-            const result = await response.json();
-
-            let html = renderHeader(false);
-            if (!result.success) {
-                html += renderErrorSection(result.error || 'シフトの取得に失敗しました');
-            } else {
-                html += renderMyShiftsSection(result.data);
-            }
-            html += renderShiftRequestSection();
-            html += renderBaseSection();
-            html += renderChekiSection();
-
-            document.getElementById('content').innerHTML = html;
-            document.getElementById('content').classList.remove('loading');
-            await loadShiftRequestForm();
-            await loadBaseOrders();
-            await loadChekis();
-        }
-
-        function renderHeader(isManager) {
+        function renderHome() {
+            const isManager = castData.isManager;
             const roleLabel = isManager ? '管理者' : 'キャスト';
             const roleClass = isManager ? 'role manager' : 'role';
-            return `
+
+            // 今日のシフト取得
+            let todayHtml = '';
+            if (!isManager && cachedShiftData && cachedShiftData.success) {
+                const shifts = cachedShiftData.data.current.shifts || [];
+                const today = new Date();
+                const todayLabel = `${today.getMonth() + 1}/${today.getDate()}`;
+                const todayShift = shifts.find(s => s.date && s.date.startsWith(todayLabel));
+                if (todayShift) {
+                    todayHtml = `
+                        <div class="today-shift-card">
+                            <div class="today-shift-title">📅 今日のシフト</div>
+                            <div class="today-shift-time">${todayShift.start} - ${todayShift.end}</div>
+                            ${getStatusTag(todayShift.status)}
+                        </div>
+                    `;
+                } else {
+                    todayHtml = `
+                        <div class="today-shift-card">
+                            <div class="today-shift-title">📅 今日のシフト</div>
+                            <div style="color:#aaa;font-size:14px;">今日の出勤はありません</div>
+                        </div>
+                    `;
+                }
+            }
+
+            // サマリーカード（データロード後に更新）
+            const html = `
                 <div class="header-card">
-                    <div class="user-name">${castData.name} さん</div>
+                    <div class="user-name">${escapeHtml(castData.name)} さん</div>
                     <span class="${roleClass}">${roleLabel}</span>
-                    <div style="color: #999; font-size: 12px; margin-top: 6px;">${castData.store}</div>
+                    <div style="color:#999;font-size:12px;margin-top:6px;">${escapeHtml(castData.store)}</div>
+                </div>
+                ${todayHtml}
+                <div class="home-summary-grid">
+                    <div class="home-summary-card" onclick="switchTab('base')">
+                        <div class="home-summary-num alert" id="home-base-count">-</div>
+                        <div class="home-summary-label">未対応 遠隔注文</div>
+                    </div>
+                    <div class="home-summary-card" onclick="switchTab('cheki')">
+                        <div class="home-summary-num" id="home-cheki-count" style="color:#2196f3;">-</div>
+                        <div class="home-summary-label">対応中 宿題チェキ</div>
+                    </div>
+                </div>
+                <div class="footer">推し推せ AKIBA 業務アプリ v0.7</div>
+            `;
+
+            document.getElementById('home-content').innerHTML = html;
+            document.getElementById('home-content').classList.remove('loading');
+        }
+
+        function updateHomeSummary() {
+            // BASE未対応件数
+            if (cachedBaseData) {
+                const pendingCount = (cachedBaseData.pending || []).length;
+                const el = document.getElementById('home-base-count');
+                if (el) {
+                    el.textContent = pendingCount;
+                    el.className = `home-summary-num ${pendingCount > 0 ? 'alert' : 'ok'}`;
+                }
+                // タブバッジ
+                const badge = document.getElementById('base-tab-badge');
+                if (badge) {
+                    if (pendingCount > 0) { badge.textContent = pendingCount; badge.style.display = ''; }
+                    else { badge.style.display = 'none'; }
+                }
+            }
+            // チェキ対応中件数
+            if (cachedChekiData) {
+                const activeCount = (cachedChekiData.active || []).length;
+                const el = document.getElementById('home-cheki-count');
+                if (el) {
+                    el.textContent = activeCount;
+                    el.className = `home-summary-num ${activeCount > 0 ? '' : 'ok'}`;
+                    if (activeCount > 0) el.style.color = '#2196f3';
+                    else el.style.color = '#06c755';
+                }
+                // タブバッジ
+                const badge = document.getElementById('cheki-tab-badge');
+                if (badge) {
+                    if (activeCount > 0) { badge.textContent = activeCount; badge.style.display = ''; }
+                    else { badge.style.display = 'none'; }
+                }
+            }
+        }
+
+        function renderShiftTab(isManager) {
+            let html = '';
+            if (isManager) {
+                if (!cachedShiftData || !cachedShiftData.success) {
+                    html = `<div class="error">全体シフトの取得に失敗しました</div>`;
+                } else {
+                    const akibaData = cachedShiftData.data.current.akiba;
+                    if (!akibaData || !akibaData.shiftsByDate) {
+                        html = `<div class="section"><div class="empty">シフトデータがありません</div></div>`;
+                    } else {
+                        html = renderAllShiftsSection(akibaData);
+                    }
+                }
+            } else {
+                if (!cachedShiftData || !cachedShiftData.success) {
+                    html = `<div class="error">${escapeHtml(cachedShiftData?.error || 'シフトの取得に失敗しました')}</div>`;
+                } else {
+                    html = renderMyShiftsSection(cachedShiftData.data);
+                }
+            }
+            html += `
+                <div class="section" id="shift-request-section">
+                    <div class="section-title">📝 シフト希望提出</div>
+                    <div id="shift-request-content" class="loading">読み込み中...</div>
                 </div>
             `;
+            document.getElementById('shift-content').innerHTML = html;
+            document.getElementById('shift-content').classList.remove('loading');
         }
 
         function renderMyShiftsSection(data) {
@@ -778,358 +846,12 @@
             return html;
         }
 
-        function renderShiftRequestSection() {
-            return `
-                <div class="section" id="shift-request-section">
-                    <div class="section-title">📝 シフト希望提出</div>
-                    <div id="shift-request-content" class="loading">読み込み中...</div>
-                </div>
-            `;
-        }
-
-        // ==========================================
-        // BASE注文管理
-        // ==========================================
-
-        function renderBaseSection() {
-            return `
-                <div class="section" id="base-section">
-                    <div class="section-title">📦 BASE注文管理 <span id="base-pending-badge"></span></div>
-                    <div id="base-content" class="loading">読み込み中...</div>
-                </div>
-            `;
-        }
-
-        async function loadBaseOrders() {
-            try {
-                const url = `${GAS_URL}?action=getBaseOrders&userId=${lineProfile.userId}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                if (!result.success) {
-                    document.getElementById('base-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
-                    return;
-                }
-                renderBaseOrders(result);
-            } catch (e) {
-                document.getElementById('base-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
-            }
-        }
-
-        function renderBaseOrders(result) {
-            const pending = result.pending || [];
-            const thisMonth = result.thisMonth || [];
-            const badge = document.getElementById('base-pending-badge');
-            if (badge && pending.length > 0) badge.innerHTML = `<span class="base-pending-count">${pending.length}</span>`;
-
-            let html = `
-                <div class="base-tab-bar">
-                    <div class="base-tab active" id="tab-pending" onclick="switchBaseTab('pending')">未対応${pending.length > 0 ? ` (${pending.length})` : ''}</div>
-                    <div class="base-tab" id="tab-thismonth" onclick="switchBaseTab('thismonth')">今月 (${thisMonth.length})</div>
-                </div>
-            `;
-            html += `<div class="base-panel active" id="panel-pending">`;
-            if (pending.length === 0) {
-                html += `<div class="empty">✨ 未対応の注文はありません</div>`;
-            } else {
-                pending.forEach(order => { html += renderBaseOrderCard(order, true); });
-            }
-            html += `</div>`;
-            html += `<div class="base-panel" id="panel-thismonth">`;
-            if (thisMonth.length === 0) {
-                html += `<div class="empty">今月の注文はありません</div>`;
-            } else {
-                thisMonth.forEach(order => {
-                    const isPending = order.handleStatus === '未対応' || order.handleStatus === '';
-                    html += renderBaseOrderCard(order, isPending);
-                });
-            }
-            html += `</div>`;
-            document.getElementById('base-content').innerHTML = html;
-            document.getElementById('base-content').classList.remove('loading');
-        }
-
-        function renderBaseOrderCard(order, showBtn) {
-            const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment' : order.paymentStatus === 'キャンセル' ? 'done' : 'waiting';
-            const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid' : order.paymentStatus === 'キャンセル' ? 'badge-cancel' : 'badge-paid';
-            const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
-            const cardClass = isDone ? 'done' : paymentClass;
-            const subtotalDisplay = (order.subtotal !== '' && order.subtotal !== null && !isNaN(Number(order.subtotal)) && Number(order.subtotal) > 0)
-                ? '¥' + Number(order.subtotal).toLocaleString() : '¥-';
-            let btnHtml = isDone
-                ? `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`
-                : showBtn ? `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>` : '';
-            const noteHtml = order.note ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>` : '';
-            return `
-                <div class="base-order-card ${cardClass}" id="order-card-${order.rowIndex}">
-                    <div class="base-order-meta">
-                        <span class="base-order-id">${escapeHtml(order.orderDateStr)} / ${escapeHtml(order.orderId)}</span>
-                        <span class="base-payment-badge ${badgeClass}">${escapeHtml(order.paymentStatus)}</span>
-                    </div>
-                    <div class="base-order-product">${escapeHtml(order.productName)} × ${order.quantity}</div>
-                    <div class="base-order-sub">呼び名: ${escapeHtml(order.yobiName)} ／ ${subtotalDisplay}</div>
-                    ${noteHtml}${btnHtml}
-                </div>
-            `;
-        }
-
-        function switchBaseTab(tab) {
-            document.querySelectorAll('.base-tab').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.base-panel').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            document.getElementById(`panel-${tab}`).classList.add('active');
-        }
-
-        async function markHandled(btn, rowIndex) {
-            showModal('この注文を対応済みにしますか？', async () => {
-                btn.disabled = true;
-                btn.textContent = '送信中...';
-                try {
-                    const response = await fetch(GAS_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'markBaseOrderHandled', userId: lineProfile.userId, rowIndex: rowIndex })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        const card = document.getElementById(`order-card-${rowIndex}`);
-                        if (card) {
-                            card.classList.add('handled-anim');
-                            setTimeout(() => {
-                                card.classList.remove('base-order-card', 'pending-payment', 'waiting', 'handled-anim');
-                                card.classList.add('base-order-card', 'done');
-                                card.style.opacity = '';
-                                card.style.transform = '';
-                                btn.className = 'base-handle-btn done-btn';
-                                btn.disabled = true;
-                                btn.textContent = '✓ 対応済み';
-                                refreshBaseTabCounts();
-                            }, 300);
-                        }
-                    } else {
-                        showAlert('エラー: ' + (result.error || '失敗しました'));
-                        btn.disabled = false;
-                        btn.textContent = '対応完了にする';
-                    }
-                } catch (e) {
-                    showAlert('エラー: ' + e.message);
-                    btn.disabled = false;
-                    btn.textContent = '対応完了にする';
-                }
-            });
-        }
-
-        function refreshBaseTabCounts() {
-            const pendingPanel = document.getElementById('panel-pending');
-            if (!pendingPanel) return;
-            const remaining = pendingPanel.querySelectorAll('.base-order-card:not(.done)').length;
-            const tabEl = document.getElementById('tab-pending');
-            if (tabEl) tabEl.textContent = `未対応${remaining > 0 ? ` (${remaining})` : ''}`;
-            const badge = document.getElementById('base-pending-badge');
-            if (badge) badge.innerHTML = remaining > 0 ? `<span class="base-pending-count">${remaining}</span>` : '';
-        }
-
-        // ==========================================
-        // チェキ管理
-        // ==========================================
-
-        function renderChekiSection() {
-            return `
-                <div class="section" id="cheki-section">
-                    <div class="section-title">📸 宿題チェキ管理</div>
-                    <div id="cheki-content" class="loading">読み込み中...</div>
-                </div>
-            `;
-        }
-
-        async function loadChekis() {
-            try {
-                const url = `${GAS_URL}?action=getMyChekis&userId=${lineProfile.userId}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                if (!result.success) {
-                    document.getElementById('cheki-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
-                    return;
-                }
-                renderChekis(result.data);
-            } catch (e) {
-                document.getElementById('cheki-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
-            }
-        }
-
-        function renderChekis(data) {
-            const active = data.active || [];
-            const done = data.done || [];
-
-            let html = `<button class="cheki-add-btn" onclick="openChekiModal()">＋ 新しいチェキを登録する</button>`;
-
-            if (active.length === 0) {
-                html += `<div class="empty">対応中のチェキはありません ✨</div>`;
-            } else {
-                active.forEach(c => { html += renderChekiCard(c); });
-            }
-
-            // 完了済みは折りたたみ
-            if (done.length > 0) {
-                html += `
-                    <div class="cheki-done-section">
-                        <div class="cheki-done-toggle" onclick="toggleChekiDone()">
-                            お渡し完了 (${done.length}) ▶
-                        </div>
-                        <div class="cheki-done-list" id="cheki-done-list">
-                `;
-                done.forEach(c => { html += renderChekiCard(c); });
-                html += `</div></div>`;
-            }
-
-            document.getElementById('cheki-content').innerHTML = html;
-            document.getElementById('cheki-content').classList.remove('loading');
-        }
-
-        function renderChekiCard(cheki) {
-            const statusClass = cheki.status === '作業中' ? 'status-working'
-                              : cheki.status === 'チェキBOX投函' ? 'status-boxed'
-                              : 'status-done';
-            const badgeClass = cheki.status === '作業中' ? 'badge-working'
-                             : cheki.status === 'チェキBOX投函' ? 'badge-boxed'
-                             : 'badge-done';
-            const isDone = cheki.status === 'お渡し完了';
-
-            const noteHtml = cheki.note ? `<div class="cheki-note">📝 ${escapeHtml(cheki.note)}</div>` : '';
-
-            let btnsHtml = '';
-            if (!isDone) {
-                const isBoxed = cheki.status === 'チェキBOX投函';
-                btnsHtml = `
-                    <div class="cheki-status-btns">
-                        <button class="cheki-status-btn btn-box" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'チェキBOX投函')" ${isBoxed ? 'disabled' : ''}>
-                            ${isBoxed ? '✓ BOX投函済み' : '📥 BOX投函'}
-                        </button>
-                        <button class="cheki-status-btn btn-done" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'お渡し完了')">
-                            ✅ お渡し完了
-                        </button>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="cheki-card ${statusClass}" id="cheki-card-${cheki.rowIndex}">
-                    <div class="cheki-card-header">
-                        <div class="cheki-customer">${escapeHtml(cheki.customerName)}</div>
-                        <span class="cheki-status-badge ${badgeClass}">${escapeHtml(cheki.status)}</span>
-                    </div>
-                    <div class="cheki-meta">
-                        撮影: ${escapeHtml(cheki.shootDate)}
-                        ${cheki.deliveryDate ? '／ お渡し予定: ' + escapeHtml(cheki.deliveryDate) : ''}
-                        ／ 登録: ${escapeHtml(cheki.createdAt)}
-                    </div>
-                    ${noteHtml}
-                    ${btnsHtml}
-                </div>
-            `;
-        }
-
-        function toggleChekiDone() {
-            const list = document.getElementById('cheki-done-list');
-            if (list) list.classList.toggle('open');
-        }
-
-        function openChekiModal() {
-            // 今日の日付をデフォルトに
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('cheki-customer').value = '';
-            document.getElementById('cheki-shoot-date').value = today;
-            document.getElementById('cheki-delivery-date').value = '';
-            document.getElementById('cheki-note').value = '';
-            document.getElementById('cheki-form-msg').textContent = '';
-            document.getElementById('cheki-modal').classList.add('active');
-        }
-
-        function closeChekiModal() {
-            document.getElementById('cheki-modal').classList.remove('active');
-        }
-
-        async function submitCheki() {
-            const customerName = document.getElementById('cheki-customer').value.trim();
-            const shootDate = document.getElementById('cheki-shoot-date').value;
-            const deliveryDate = document.getElementById('cheki-delivery-date').value;
-            const note = document.getElementById('cheki-note').value.trim();
-            const msgEl = document.getElementById('cheki-form-msg');
-
-            if (!customerName) { msgEl.textContent = 'お客様名を入力してください'; msgEl.className = 'msg msg-err'; return; }
-            if (!shootDate) { msgEl.textContent = '撮影日を入力してください'; msgEl.className = 'msg msg-err'; return; }
-            if (!deliveryDate) { msgEl.textContent = 'お渡し予定日を入力してください'; msgEl.className = 'msg msg-err'; return; }
-
-            msgEl.textContent = '登録中...';
-            msgEl.className = 'msg msg-ok';
-
-            try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'addCheki',
-                        userId: lineProfile.userId,
-                        customerName, shootDate, deliveryDate, note
-                    })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    closeChekiModal();
-                    await loadChekis();
-                } else {
-                    msgEl.textContent = 'エラー: ' + (result.error || '失敗しました');
-                    msgEl.className = 'msg msg-err';
-                }
-            } catch (e) {
-                msgEl.textContent = 'エラー: ' + e.message;
-                msgEl.className = 'msg msg-err';
-            }
-        }
-
-        async function updateChekiStatus(btn, rowIndex, newStatus) {
-            const label = newStatus === 'チェキBOX投函' ? 'BOX投函済みにしますか？' : 'お渡し完了にしますか？';
-            showModal(label, async () => {
-                btn.disabled = true;
-                btn.textContent = '送信中...';
-                try {
-                    const response = await fetch(GAS_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            action: 'updateChekiStatus',
-                            userId: lineProfile.userId,
-                            rowIndex: rowIndex,
-                            status: newStatus
-                        })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        await loadChekis();
-                    } else {
-                        showAlert('エラー: ' + (result.error || '失敗しました'));
-                        btn.disabled = false;
-                        btn.textContent = newStatus === 'チェキBOX投函' ? '📥 BOX投函' : '✅ お渡し完了';
-                    }
-                } catch (e) {
-                    showAlert('エラー: ' + e.message);
-                    btn.disabled = false;
-                }
-            });
-        }
-
         // ==========================================
         // シフト希望提出
         // ==========================================
-
-        function renderErrorSection(message) {
-            return `<div class="error">${message}</div>`;
-        }
-
         async function loadShiftRequestForm() {
             try {
-                const url = `${GAS_URL}?action=getShiftRequestForm&userId=${lineProfile.userId}`;
-                const response = await fetch(url);
-                const result = await response.json();
+                const result = await fetch(`${GAS_URL}?action=getShiftRequestForm&userId=${lineProfile.userId}`).then(r => r.json());
                 if (!result.success) {
                     document.getElementById('shift-request-content').innerHTML = `<div class="error">${result.error || 'フォームの取得に失敗しました'}</div>`;
                     return;
@@ -1145,30 +867,18 @@
             const d = shiftRequestData;
             let html = '';
             if (d.isAfterDeadline) {
-                html += `
-                    <div class="warning-banner">
-                        <span class="big">⚠️ 提出期限を過ぎています ⚠️</span>
-                        提出は可能ですが、必ず期限内に提出するようお願いします
-                        ${d.castLateCount > 0 ? `<div class="count">これまで ${d.castLateCount} 回 遅れています</div>` : ''}
-                    </div>
-                `;
+                html += `<div class="warning-banner"><span class="big">⚠️ 提出期限を過ぎています ⚠️</span>提出は可能ですが、必ず期限内に提出するようお願いします${d.castLateCount > 0 ? `<div class="count">これまで ${d.castLateCount} 回 遅れています</div>` : ''}</div>`;
             } else if (d.castLateCount > 0) {
-                html += `
-                    <div class="warning-banner orange">
-                        <span class="big">⚠️ 過去の提出遅延について</span>
-                        これまで <span class="count">${d.castLateCount} 回</span> 期限を過ぎて提出しています<br>
-                        今回は期限内に提出をお願いします
-                    </div>
-                `;
+                html += `<div class="warning-banner orange"><span class="big">⚠️ 過去の提出遅延について</span>これまで <span class="count">${d.castLateCount} 回</span> 期限を過ぎて提出しています<br>今回は期限内に提出をお願いします</div>`;
             }
             html += `
                 <div class="deadline-info">
                     対象: <strong>${d.period}</strong>分（${d.dates[0].label} 〜 ${d.dates[d.dates.length - 1].label}）<br>
                     📅 締切: <strong>${d.deadlineLabel}</strong>
-                    <div style="font-size: 11px; color: #999; margin-top: 4px;">出勤しない日は「--」のままにしてください。締切までは何度でも修正可能です。</div>
+                    <div style="font-size:11px;color:#999;margin-top:4px;">出勤しない日は「--」のままにしてください。締切までは何度でも修正可能です。</div>
                 </div>
+                <div id="shift-rows">
             `;
-            html += `<div id="shift-rows">`;
             d.dates.forEach((date, i) => {
                 const existing = d.existingShifts[i] || '';
                 const parts = existing.split('-');
@@ -1194,11 +904,10 @@
                     </div>
                 `;
             });
-            html += `</div>`;
-            html += `
+            html += `</div>
                 <label class="note-label">備考（自由記入）</label>
-                <textarea class="note-input" id="shift-note" placeholder="例: 通院のため遅れる可能性あり、◯日は20時以降のみ可など">${escapeHtml(d.existingNote || '')}</textarea>
-                <div style="font-size: 11px; color: #888; margin-top: 4px;">伝えたいことがあれば自由に記入してください。</div>
+                <textarea class="note-input" id="shift-note" placeholder="例: 通院のため遅れる可能性あり">${escapeHtml(d.existingNote || '')}</textarea>
+                <div style="font-size:11px;color:#888;margin-top:4px;">伝えたいことがあれば自由に記入してください。</div>
                 <button class="submit-btn" id="shift-submit-btn" onclick="submitShiftRequest()">提出する</button>
                 <div class="msg" id="shift-submit-msg"></div>
             `;
@@ -1215,37 +924,33 @@
             const ends = document.querySelectorAll('.shift-end');
             const shifts = [];
             for (let i = 0; i < starts.length; i++) {
-                const s = starts[i].value;
-                const e = ends[i].value;
-                if ((s && !e) || (!s && e)) { showShiftMsg(`${i + 1}日目：開始時刻と終了時刻はセットで選択してください`, false); return; }
-                if (s && e && toMinutes(s) >= toMinutes(e)) { showShiftMsg(`${i + 1}日目：終了時刻は開始時刻より後にしてください`, false); return; }
+                const s = starts[i].value, e = ends[i].value;
+                if ((s && !e) || (!s && e)) { showShiftMsg(`${i + 1}日目：開始・終了をセットで選択してください`, false); return; }
+                if (s && e && toMinutes(s) >= toMinutes(e)) { showShiftMsg(`${i + 1}日目：終了は開始より後にしてください`, false); return; }
                 shifts.push(s && e ? `${s}-${e}` : '');
             }
             const doSubmit = async () => {
                 const btn = document.getElementById('shift-submit-btn');
-                btn.disabled = true;
-                btn.textContent = '送信中...';
+                btn.disabled = true; btn.textContent = '送信中...';
                 showShiftMsg('送信中...', true);
                 try {
                     const note = document.getElementById('shift-note').value;
-                    const response = await fetch(GAS_URL, {
+                    const result = await fetch(GAS_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ action: 'submitShiftRequest', lineUserId: lineProfile.userId, period: shiftRequestData.period, shifts, note })
-                    });
-                    const result = await response.json();
-                    btn.disabled = false;
-                    btn.textContent = '提出する';
+                    }).then(r => r.json());
+                    btn.disabled = false; btn.textContent = '提出する';
                     if (result.success) {
-                        showShiftMsg(result.data.isAfterDeadline ? '⚠️ 提出完了しました（締切後提出として記録されました）' : '✓ 提出完了しました！', true);
+                        showShiftMsg(result.data.isAfterDeadline ? '⚠️ 提出完了（締切後提出として記録）' : '✓ 提出完了しました！', true);
                         setTimeout(() => loadShiftRequestForm(), 1500);
                     } else {
                         showShiftMsg('エラー: ' + (result.error || '送信に失敗しました'), false);
                     }
-                } catch (error) {
+                } catch (err) {
                     document.getElementById('shift-submit-btn').disabled = false;
                     document.getElementById('shift-submit-btn').textContent = '提出する';
-                    showShiftMsg('エラー: ' + error.message, false);
+                    showShiftMsg('エラー: ' + err.message, false);
                 }
             };
             if (shiftRequestData.isAfterDeadline) {
@@ -1255,6 +960,253 @@
             }
         }
 
+        // ==========================================
+        // BASE注文管理
+        // ==========================================
+        async function loadBaseOrders() {
+            try {
+                const result = await fetch(`${GAS_URL}?action=getBaseOrders&userId=${lineProfile.userId}`).then(r => r.json());
+                if (!result.success) {
+                    document.getElementById('base-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                    return;
+                }
+                cachedBaseData = result;
+                renderBaseOrders(result);
+                updateHomeSummary();
+            } catch (e) {
+                document.getElementById('base-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
+            }
+        }
+
+        function renderBaseOrders(result) {
+            const pending = result.pending || [];
+            const thisMonth = result.thisMonth || [];
+            let html = `
+                <div class="base-tab-bar">
+                    <div class="base-tab active" id="btab-pending" onclick="switchBaseTab('pending')">未対応${pending.length > 0 ? ` (${pending.length})` : ''}</div>
+                    <div class="base-tab" id="btab-thismonth" onclick="switchBaseTab('thismonth')">今月 (${thisMonth.length})</div>
+                </div>
+                <div class="base-panel active" id="bpanel-pending">
+            `;
+            if (pending.length === 0) { html += `<div class="empty">✨ 未対応の注文はありません</div>`; }
+            else { pending.forEach(o => { html += renderBaseOrderCard(o, true); }); }
+            html += `</div><div class="base-panel" id="bpanel-thismonth">`;
+            if (thisMonth.length === 0) { html += `<div class="empty">今月の注文はありません</div>`; }
+            else { thisMonth.forEach(o => { html += renderBaseOrderCard(o, o.handleStatus === '未対応' || o.handleStatus === ''); }); }
+            html += `</div>`;
+            document.getElementById('base-content').innerHTML = html;
+            document.getElementById('base-content').classList.remove('loading');
+        }
+
+        function renderBaseOrderCard(order, showBtn) {
+            const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment' : order.paymentStatus === 'キャンセル' ? 'done' : 'waiting';
+            const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid' : order.paymentStatus === 'キャンセル' ? 'badge-cancel' : 'badge-paid';
+            const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
+            const subtotalDisplay = (order.subtotal && !isNaN(Number(order.subtotal)) && Number(order.subtotal) > 0) ? '¥' + Number(order.subtotal).toLocaleString() : '¥-';
+            const btnHtml = isDone ? `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`
+                : showBtn ? `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>` : '';
+            const noteHtml = order.note ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>` : '';
+            return `
+                <div class="base-order-card ${isDone ? 'done' : paymentClass}" id="order-card-${order.rowIndex}">
+                    <div class="base-order-meta">
+                        <span class="base-order-id">${escapeHtml(order.orderDateStr)} / ${escapeHtml(order.orderId)}</span>
+                        <span class="base-payment-badge ${badgeClass}">${escapeHtml(order.paymentStatus)}</span>
+                    </div>
+                    <div class="base-order-product">${escapeHtml(order.productName)} × ${order.quantity}</div>
+                    <div class="base-order-sub">呼び名: ${escapeHtml(order.yobiName)} ／ ${subtotalDisplay}</div>
+                    ${noteHtml}${btnHtml}
+                </div>
+            `;
+        }
+
+        function switchBaseTab(tab) {
+            document.querySelectorAll('.base-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.base-panel').forEach(el => el.classList.remove('active'));
+            document.getElementById(`btab-${tab}`).classList.add('active');
+            document.getElementById(`bpanel-${tab}`).classList.add('active');
+        }
+
+        async function markHandled(btn, rowIndex) {
+            showModal('この注文を対応済みにしますか？', async () => {
+                btn.disabled = true; btn.textContent = '送信中...';
+                try {
+                    const result = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'markBaseOrderHandled', userId: lineProfile.userId, rowIndex })
+                    }).then(r => r.json());
+                    if (result.success) {
+                        const card = document.getElementById(`order-card-${rowIndex}`);
+                        if (card) {
+                            card.classList.add('handled-anim');
+                            setTimeout(() => {
+                                card.className = 'base-order-card done';
+                                card.style.opacity = ''; card.style.transform = '';
+                                btn.className = 'base-handle-btn done-btn';
+                                btn.disabled = true; btn.textContent = '✓ 対応済み';
+                                // キャッシュ更新
+                                if (cachedBaseData) {
+                                    cachedBaseData.pending = (cachedBaseData.pending || []).filter(o => o.rowIndex !== rowIndex);
+                                }
+                                updateHomeSummary();
+                                refreshBaseTabLabel();
+                            }, 300);
+                        }
+                    } else {
+                        showAlert('エラー: ' + (result.error || '失敗しました'));
+                        btn.disabled = false; btn.textContent = '対応完了にする';
+                    }
+                } catch (e) {
+                    showAlert('エラー: ' + e.message);
+                    btn.disabled = false; btn.textContent = '対応完了にする';
+                }
+            });
+        }
+
+        function refreshBaseTabLabel() {
+            const panel = document.getElementById('bpanel-pending');
+            if (!panel) return;
+            const remaining = panel.querySelectorAll('.base-order-card:not(.done)').length;
+            const tab = document.getElementById('btab-pending');
+            if (tab) tab.textContent = `未対応${remaining > 0 ? ` (${remaining})` : ''}`;
+        }
+
+        // ==========================================
+        // チェキ管理
+        // ==========================================
+        async function loadChekis() {
+            try {
+                const result = await fetch(`${GAS_URL}?action=getMyChekis&userId=${lineProfile.userId}`).then(r => r.json());
+                if (!result.success) {
+                    document.getElementById('cheki-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                    return;
+                }
+                cachedChekiData = result.data;
+                renderChekis(result.data);
+                updateHomeSummary();
+            } catch (e) {
+                document.getElementById('cheki-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
+            }
+        }
+
+        function renderChekis(data) {
+            const active = data.active || [];
+            const done = data.done || [];
+            let html = `<button class="cheki-add-btn" onclick="openChekiModal()">＋ 新しいチェキを登録する</button>`;
+            if (active.length === 0) { html += `<div class="empty">対応中のチェキはありません ✨</div>`; }
+            else { active.forEach(c => { html += renderChekiCard(c); }); }
+            if (done.length > 0) {
+                html += `<div class="cheki-done-toggle" onclick="toggleChekiDone()">お渡し完了 (${done.length}) ▶</div><div class="cheki-done-list" id="cheki-done-list">`;
+                done.forEach(c => { html += renderChekiCard(c); });
+                html += `</div>`;
+            }
+            document.getElementById('cheki-content').innerHTML = html;
+            document.getElementById('cheki-content').classList.remove('loading');
+        }
+
+        function renderChekiCard(cheki) {
+            const statusClass = cheki.status === '作業中' ? 'status-working' : cheki.status === 'チェキBOX投函' ? 'status-boxed' : 'status-done';
+            const badgeClass = cheki.status === '作業中' ? 'badge-working' : cheki.status === 'チェキBOX投函' ? 'badge-boxed' : 'badge-done';
+            const isDone = cheki.status === 'お渡し完了';
+            const isBoxed = cheki.status === 'チェキBOX投函';
+            const noteHtml = cheki.note ? `<div class="cheki-note">📝 ${escapeHtml(cheki.note)}</div>` : '';
+            const btnsHtml = isDone ? '' : `
+                <div class="cheki-status-btns">
+                    <button class="cheki-status-btn btn-box" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'チェキBOX投函')" ${isBoxed ? 'disabled' : ''}>
+                        ${isBoxed ? '✓ BOX投函済み' : '📥 BOX投函'}
+                    </button>
+                    <button class="cheki-status-btn btn-done" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'お渡し完了')">✅ お渡し完了</button>
+                </div>
+            `;
+            return `
+                <div class="cheki-card ${statusClass}" id="cheki-card-${cheki.rowIndex}">
+                    <div class="cheki-card-header">
+                        <div class="cheki-customer">${escapeHtml(cheki.customerName)}</div>
+                        <span class="cheki-status-badge ${badgeClass}">${escapeHtml(cheki.status)}</span>
+                    </div>
+                    <div class="cheki-meta">
+                        撮影: ${escapeHtml(cheki.shootDate)}
+                        ${cheki.deliveryDate ? '／ お渡し予定: ' + escapeHtml(cheki.deliveryDate) : ''}
+                        ／ 登録: ${escapeHtml(cheki.createdAt)}
+                    </div>
+                    ${noteHtml}${btnsHtml}
+                </div>
+            `;
+        }
+
+        function toggleChekiDone() {
+            const list = document.getElementById('cheki-done-list');
+            if (list) list.classList.toggle('open');
+        }
+
+        function openChekiModal() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('cheki-customer').value = '';
+            document.getElementById('cheki-shoot-date').value = today;
+            document.getElementById('cheki-delivery-date').value = '';
+            document.getElementById('cheki-note').value = '';
+            document.getElementById('cheki-form-msg').textContent = '';
+            document.getElementById('cheki-modal').classList.add('active');
+        }
+
+        function closeChekiModal() {
+            document.getElementById('cheki-modal').classList.remove('active');
+        }
+
+        async function submitCheki() {
+            const customerName = document.getElementById('cheki-customer').value.trim();
+            const shootDate = document.getElementById('cheki-shoot-date').value;
+            const deliveryDate = document.getElementById('cheki-delivery-date').value;
+            const note = document.getElementById('cheki-note').value.trim();
+            const msgEl = document.getElementById('cheki-form-msg');
+            if (!customerName) { msgEl.textContent = 'お客様名を入力してください'; msgEl.className = 'msg msg-err'; return; }
+            if (!shootDate) { msgEl.textContent = '撮影日を入力してください'; msgEl.className = 'msg msg-err'; return; }
+            if (!deliveryDate) { msgEl.textContent = 'お渡し予定日を入力してください'; msgEl.className = 'msg msg-err'; return; }
+            msgEl.textContent = '登録中...'; msgEl.className = 'msg msg-ok';
+            try {
+                const result = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'addCheki', userId: lineProfile.userId, customerName, shootDate, deliveryDate, note })
+                }).then(r => r.json());
+                if (result.success) {
+                    closeChekiModal();
+                    await loadChekis();
+                } else {
+                    msgEl.textContent = 'エラー: ' + (result.error || '失敗しました'); msgEl.className = 'msg msg-err';
+                }
+            } catch (e) {
+                msgEl.textContent = 'エラー: ' + e.message; msgEl.className = 'msg msg-err';
+            }
+        }
+
+        async function updateChekiStatus(btn, rowIndex, newStatus) {
+            const label = newStatus === 'チェキBOX投函' ? 'BOX投函済みにしますか？' : 'お渡し完了にしますか？';
+            showModal(label, async () => {
+                btn.disabled = true; btn.textContent = '送信中...';
+                try {
+                    const result = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'updateChekiStatus', userId: lineProfile.userId, rowIndex, status: newStatus })
+                    }).then(r => r.json());
+                    if (result.success) {
+                        await loadChekis();
+                    } else {
+                        showAlert('エラー: ' + (result.error || '失敗しました'));
+                        btn.disabled = false;
+                        btn.textContent = newStatus === 'チェキBOX投函' ? '📥 BOX投函' : '✅ お渡し完了';
+                    }
+                } catch (e) {
+                    showAlert('エラー: ' + e.message);
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        // ==========================================
+        // ユーティリティ
+        // ==========================================
         function toMinutes(t) {
             const [h, m] = t.split(':').map(Number);
             return h * 60 + m;
@@ -1288,18 +1240,22 @@
             document.getElementById(`${dayId}-toggle`).classList.toggle('open');
         }
 
-        function showNotRegistered(result) {
-            document.getElementById('content').innerHTML = `
-                <div class="header-card"><div class="user-name">${lineProfile.displayName} さん</div></div>
+        function renderErrorSection(message) {
+            return `<div class="error">${message}</div>`;
+        }
+
+        function showNotRegistered() {
+            document.getElementById('home-content').innerHTML = `
+                <div class="header-card"><div class="user-name">${escapeHtml(lineProfile.displayName)} さん</div></div>
                 <div class="error">キャスト名簿に登録されていません。<br>管理者にお問い合わせください。</div>
                 <div class="section"><div style="font-size:11px;color:#999;word-break:break-all;">LINE User ID: ${lineProfile.userId}</div></div>
             `;
-            document.getElementById('content').classList.remove('loading');
+            document.getElementById('home-content').classList.remove('loading');
         }
 
         function showError(error) {
-            document.getElementById('content').innerHTML = `<div class="error">エラーが発生しました。<br><small>${error.message || error}</small></div>`;
-            document.getElementById('content').classList.remove('loading');
+            document.getElementById('home-content').innerHTML = `<div class="error">エラーが発生しました。<br><small>${error.message || error}</small></div>`;
+            document.getElementById('home-content').classList.remove('loading');
         }
 
         main();
