@@ -744,8 +744,7 @@
                     loadHomeAndShift(),
                     loadBaseOrders(),
                     loadChekis(),
-                    loadNotices() 
-                ]);
+                    ]);
 
             } catch (error) {
                 showError(error);
@@ -770,9 +769,10 @@
         renderHome();
         renderShiftTab(isManager);
         await loadShiftRequestForm();
-
-        // renderHome()の後にサマリー更新
         updateHomeSummary();
+
+        // renderHome()でnotices-areaが生成された後に実行
+        await loadNotices();
 
     } catch (e) {
         document.getElementById('home-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
