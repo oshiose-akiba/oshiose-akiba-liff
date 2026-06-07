@@ -365,10 +365,7 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        .base-handle-btn:disabled {
-            background: #ccc;
-            cursor: default;
-        }
+        .base-handle-btn:disabled { background: #ccc; cursor: default; }
         .base-handle-btn.done-btn {
             background: #e8f5e9;
             color: #2e7d32;
@@ -386,6 +383,119 @@
             vertical-align: middle;
         }
 
+        /* チェキ管理 */
+        .cheki-add-btn {
+            width: 100%;
+            padding: 12px;
+            background: #fff0f7;
+            color: #ff69b4;
+            border: 2px dashed #ff69b4;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 14px;
+        }
+        .cheki-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #fff;
+            transition: all 0.3s;
+        }
+        .cheki-card.status-working { border-left: 4px solid #ff9800; background: #fffbf5; }
+        .cheki-card.status-boxed { border-left: 4px solid #2196f3; background: #f5fbff; }
+        .cheki-card.status-done { border-left: 4px solid #ccc; background: #f9f9f9; opacity: 0.7; }
+        .cheki-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .cheki-customer {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+        .cheki-status-badge {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
+        .badge-working { background: #fff3e0; color: #e65100; }
+        .badge-boxed { background: #e3f2fd; color: #1565c0; }
+        .badge-done { background: #e8f5e9; color: #2e7d32; }
+        .cheki-meta {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        .cheki-note {
+            font-size: 12px;
+            color: #555;
+            background: #fffde7;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-bottom: 8px;
+        }
+        .cheki-status-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .cheki-status-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .cheki-status-btn.btn-box { background: #e3f2fd; color: #1565c0; }
+        .cheki-status-btn.btn-done { background: #e8f5e9; color: #2e7d32; }
+        .cheki-status-btn:disabled { background: #eee; color: #aaa; cursor: default; }
+        .cheki-done-section {
+            margin-top: 14px;
+        }
+        .cheki-done-toggle {
+            font-size: 13px;
+            color: #aaa;
+            cursor: pointer;
+            text-align: center;
+            padding: 6px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            user-select: none;
+        }
+        .cheki-done-toggle:hover { background: #f5f5f5; }
+        .cheki-done-list { display: none; margin-top: 8px; }
+        .cheki-done-list.open { display: block; }
+
+        /* チェキ登録フォーム */
+        .cheki-form { margin-top: 4px; }
+        .cheki-form-row {
+            margin-bottom: 12px;
+        }
+        .cheki-form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .cheki-form-input {
+            width: 100%;
+            padding: 9px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            background: #fff;
+        }
+        .cheki-form-input:focus { border-color: #ff69b4; outline: none; }
+
         /* カスタムモーダル */
         .modal-overlay {
             display: none;
@@ -401,8 +511,8 @@
             background: white;
             border-radius: 14px;
             padding: 24px 20px 16px;
-            width: 80%;
-            max-width: 300px;
+            width: 88%;
+            max-width: 360px;
             text-align: center;
         }
         .modal-title {
@@ -417,6 +527,7 @@
             margin-bottom: 20px;
             white-space: pre-wrap;
             line-height: 1.6;
+            text-align: left;
         }
         .modal-btns {
             display: flex;
@@ -441,7 +552,7 @@
     <div class="container">
         <h1>推し推せ AKIBA</h1>
         <div id="content" class="loading">読み込み中...</div>
-        <div class="footer">推し推せ AKIBA 業務アプリ v0.5</div>
+        <div class="footer">推し推せ AKIBA 業務アプリ v0.6</div>
     </div>
 
     <!-- カスタムモーダル -->
@@ -450,6 +561,36 @@
             <div class="modal-title" id="modal-title">確認</div>
             <div class="modal-msg" id="modal-msg"></div>
             <div class="modal-btns" id="modal-btns"></div>
+        </div>
+    </div>
+
+    <!-- チェキ登録モーダル -->
+    <div class="modal-overlay" id="cheki-modal">
+        <div class="modal-box" style="max-width:400px;">
+            <div class="modal-title">📸 チェキ登録</div>
+            <div class="cheki-form">
+                <div class="cheki-form-row">
+                    <label class="cheki-form-label">お客様名 *</label>
+                    <input class="cheki-form-input" id="cheki-customer" type="text" placeholder="例: トマト🍅さん">
+                </div>
+                <div class="cheki-form-row">
+                    <label class="cheki-form-label">撮影日 *</label>
+                    <input class="cheki-form-input" id="cheki-shoot-date" type="date">
+                </div>
+                <div class="cheki-form-row">
+                    <label class="cheki-form-label">お渡し予定日 *</label>
+                    <input class="cheki-form-input" id="cheki-delivery-date" type="date">
+                </div>
+                <div class="cheki-form-row">
+                    <label class="cheki-form-label">備考（任意）</label>
+                    <input class="cheki-form-input" id="cheki-note" type="text" placeholder="例: 落書き3枚">
+                </div>
+            </div>
+            <div class="modal-btns" style="margin-top:8px;">
+                <button class="modal-btn cancel" onclick="closeChekiModal()">キャンセル</button>
+                <button class="modal-btn ok green" onclick="submitCheki()">登録する</button>
+            </div>
+            <div class="msg" id="cheki-form-msg" style="margin-top:10px;"></div>
         </div>
     </div>
 
@@ -503,23 +644,14 @@
         async function main() {
             try {
                 await liff.init({ liffId: LIFF_ID });
-
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                    return;
-                }
+                if (!liff.isLoggedIn()) { liff.login(); return; }
 
                 lineProfile = await liff.getProfile();
-                
                 const castInfoUrl = `${GAS_URL}?action=getCastInfo&userId=${lineProfile.userId}`;
                 const castResponse = await fetch(castInfoUrl);
                 const castResult = await castResponse.json();
 
-                if (!castResult.success) {
-                    showNotRegistered(castResult);
-                    return;
-                }
-
+                if (!castResult.success) { showNotRegistered(castResult); return; }
                 castData = castResult.data;
 
                 if (castData.isManager) {
@@ -527,7 +659,6 @@
                 } else {
                     await showCastView();
                 }
-
             } catch (error) {
                 showError(error);
             }
@@ -539,7 +670,6 @@
             const result = await response.json();
 
             let html = renderHeader(true);
-
             if (!result.success) {
                 html += renderErrorSection('全体シフトの取得に失敗しました');
             } else {
@@ -550,15 +680,15 @@
                     html += renderAllShiftsSection(akibaData);
                 }
             }
-
             html += renderShiftRequestSection();
             html += renderBaseSection();
+            html += renderChekiSection();
 
             document.getElementById('content').innerHTML = html;
             document.getElementById('content').classList.remove('loading');
-            
             await loadShiftRequestForm();
             await loadBaseOrders();
+            await loadChekis();
         }
 
         async function showCastView() {
@@ -567,21 +697,20 @@
             const result = await response.json();
 
             let html = renderHeader(false);
-
             if (!result.success) {
                 html += renderErrorSection(result.error || 'シフトの取得に失敗しました');
             } else {
                 html += renderMyShiftsSection(result.data);
             }
-
             html += renderShiftRequestSection();
             html += renderBaseSection();
+            html += renderChekiSection();
 
             document.getElementById('content').innerHTML = html;
             document.getElementById('content').classList.remove('loading');
-            
             await loadShiftRequestForm();
             await loadBaseOrders();
+            await loadChekis();
         }
 
         function renderHeader(isManager) {
@@ -599,30 +728,23 @@
         function renderMyShiftsSection(data) {
             const shifts = data.current.shifts || [];
             const sheetName = data.current.sheetName || '';
-
-            let html = `
-                <div class="section">
-                    <div class="section-title">📅 自分のシフト${sheetName ? '（' + sheetName + '）' : ''}</div>
-            `;
-
+            let html = `<div class="section"><div class="section-title">📅 自分のシフト${sheetName ? '（' + sheetName + '）' : ''}</div>`;
             if (shifts.length === 0) {
                 html += `<div class="empty">今期のシフトはありません</div>`;
             } else {
                 shifts.forEach(s => {
-                    const statusTag = getStatusTag(s.status);
                     html += `
                         <div class="shift-item ${s.status}">
                             <div>
                                 <div class="shift-date">${s.date}</div>
                                 <div class="shift-time">${s.start} - ${s.end}</div>
                             </div>
-                            ${statusTag}
+                            ${getStatusTag(s.status)}
                         </div>
                     `;
                 });
                 html += `<div class="summary">出勤数: <strong>${shifts.length}</strong>日</div>`;
             }
-
             html += `</div>`;
             return html;
         }
@@ -630,15 +752,11 @@
         function renderAllShiftsSection(akibaData) {
             const dates = Object.keys(akibaData.shiftsByDate);
             const totalShifts = dates.reduce((sum, d) => sum + akibaData.shiftsByDate[d].length, 0);
-
             let html = `
                 <div class="section">
                     <div class="section-title">📅 全体シフト（${akibaData.sheetName}）</div>
-                    <div class="summary">
-                        対象期間: ${dates.length}日 / 延べ出勤: <strong>${totalShifts}</strong>名
-                    </div>
+                    <div class="summary">対象期間: ${dates.length}日 / 延べ出勤: <strong>${totalShifts}</strong>名</div>
             `;
-
             dates.forEach((date, index) => {
                 const casts = akibaData.shiftsByDate[date];
                 if (casts.length === 0) return;
@@ -652,16 +770,10 @@
                         <div class="day-body" id="${dayId}-body">
                 `;
                 casts.forEach(c => {
-                    html += `
-                        <div class="cast-line">
-                            <span>${c.name}</span>
-                            <span style="color: #666;">${c.start} - ${c.end}</span>
-                        </div>
-                    `;
+                    html += `<div class="cast-line"><span>${c.name}</span><span style="color:#666;">${c.start} - ${c.end}</span></div>`;
                 });
                 html += `</div></div>`;
             });
-
             html += `</div>`;
             return html;
         }
@@ -693,40 +805,28 @@
                 const url = `${GAS_URL}?action=getBaseOrders&userId=${lineProfile.userId}`;
                 const response = await fetch(url);
                 const result = await response.json();
-
                 if (!result.success) {
-                    document.getElementById('base-content').innerHTML =
-                        `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                    document.getElementById('base-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
                     return;
                 }
-
                 renderBaseOrders(result);
             } catch (e) {
-                document.getElementById('base-content').innerHTML =
-                    `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
+                document.getElementById('base-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
             }
         }
 
         function renderBaseOrders(result) {
             const pending = result.pending || [];
             const thisMonth = result.thisMonth || [];
-
             const badge = document.getElementById('base-pending-badge');
-            if (badge && pending.length > 0) {
-                badge.innerHTML = `<span class="base-pending-count">${pending.length}</span>`;
-            }
+            if (badge && pending.length > 0) badge.innerHTML = `<span class="base-pending-count">${pending.length}</span>`;
 
             let html = `
                 <div class="base-tab-bar">
-                    <div class="base-tab active" id="tab-pending" onclick="switchBaseTab('pending')">
-                        未対応${pending.length > 0 ? ` (${pending.length})` : ''}
-                    </div>
-                    <div class="base-tab" id="tab-thismonth" onclick="switchBaseTab('thismonth')">
-                        今月 (${thisMonth.length})
-                    </div>
+                    <div class="base-tab active" id="tab-pending" onclick="switchBaseTab('pending')">未対応${pending.length > 0 ? ` (${pending.length})` : ''}</div>
+                    <div class="base-tab" id="tab-thismonth" onclick="switchBaseTab('thismonth')">今月 (${thisMonth.length})</div>
                 </div>
             `;
-
             html += `<div class="base-panel active" id="panel-pending">`;
             if (pending.length === 0) {
                 html += `<div class="empty">✨ 未対応の注文はありません</div>`;
@@ -734,7 +834,6 @@
                 pending.forEach(order => { html += renderBaseOrderCard(order, true); });
             }
             html += `</div>`;
-
             html += `<div class="base-panel" id="panel-thismonth">`;
             if (thisMonth.length === 0) {
                 html += `<div class="empty">今月の注文はありません</div>`;
@@ -745,36 +844,21 @@
                 });
             }
             html += `</div>`;
-
             document.getElementById('base-content').innerHTML = html;
             document.getElementById('base-content').classList.remove('loading');
         }
 
         function renderBaseOrderCard(order, showBtn) {
-            const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment'
-                               : order.paymentStatus === 'キャンセル' ? 'done'
-                               : 'waiting';
-            const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid'
-                             : order.paymentStatus === 'キャンセル' ? 'badge-cancel'
-                             : 'badge-paid';
+            const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment' : order.paymentStatus === 'キャンセル' ? 'done' : 'waiting';
+            const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid' : order.paymentStatus === 'キャンセル' ? 'badge-cancel' : 'badge-paid';
             const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
             const cardClass = isDone ? 'done' : paymentClass;
-
             const subtotalDisplay = (order.subtotal !== '' && order.subtotal !== null && !isNaN(Number(order.subtotal)) && Number(order.subtotal) > 0)
-                ? '¥' + Number(order.subtotal).toLocaleString()
-                : '¥-';
-
-            let btnHtml = '';
-            if (isDone) {
-                btnHtml = `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`;
-            } else if (showBtn) {
-                btnHtml = `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>`;
-            }
-
-            const noteHtml = order.note
-                ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>`
-                : '';
-
+                ? '¥' + Number(order.subtotal).toLocaleString() : '¥-';
+            let btnHtml = isDone
+                ? `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`
+                : showBtn ? `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>` : '';
+            const noteHtml = order.note ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>` : '';
             return `
                 <div class="base-order-card ${cardClass}" id="order-card-${order.rowIndex}">
                     <div class="base-order-meta">
@@ -783,8 +867,7 @@
                     </div>
                     <div class="base-order-product">${escapeHtml(order.productName)} × ${order.quantity}</div>
                     <div class="base-order-sub">呼び名: ${escapeHtml(order.yobiName)} ／ ${subtotalDisplay}</div>
-                    ${noteHtml}
-                    ${btnHtml}
+                    ${noteHtml}${btnHtml}
                 </div>
             `;
         }
@@ -800,20 +883,13 @@
             showModal('この注文を対応済みにしますか？', async () => {
                 btn.disabled = true;
                 btn.textContent = '送信中...';
-
                 try {
                     const response = await fetch(GAS_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            action: 'markBaseOrderHandled',
-                            userId: lineProfile.userId,
-                            rowIndex: rowIndex
-                        })
+                        body: JSON.stringify({ action: 'markBaseOrderHandled', userId: lineProfile.userId, rowIndex: rowIndex })
                     });
-
                     const result = await response.json();
-
                     if (result.success) {
                         const card = document.getElementById(`order-card-${rowIndex}`);
                         if (card) {
@@ -849,11 +925,196 @@
             const tabEl = document.getElementById('tab-pending');
             if (tabEl) tabEl.textContent = `未対応${remaining > 0 ? ` (${remaining})` : ''}`;
             const badge = document.getElementById('base-pending-badge');
-            if (badge) {
-                badge.innerHTML = remaining > 0
-                    ? `<span class="base-pending-count">${remaining}</span>`
-                    : '';
+            if (badge) badge.innerHTML = remaining > 0 ? `<span class="base-pending-count">${remaining}</span>` : '';
+        }
+
+        // ==========================================
+        // チェキ管理
+        // ==========================================
+
+        function renderChekiSection() {
+            return `
+                <div class="section" id="cheki-section">
+                    <div class="section-title">📸 宿題チェキ管理</div>
+                    <div id="cheki-content" class="loading">読み込み中...</div>
+                </div>
+            `;
+        }
+
+        async function loadChekis() {
+            try {
+                const url = `${GAS_URL}?action=getMyChekis&userId=${lineProfile.userId}`;
+                const response = await fetch(url);
+                const result = await response.json();
+                if (!result.success) {
+                    document.getElementById('cheki-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                    return;
+                }
+                renderChekis(result.data);
+            } catch (e) {
+                document.getElementById('cheki-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
             }
+        }
+
+        function renderChekis(data) {
+            const active = data.active || [];
+            const done = data.done || [];
+
+            let html = `<button class="cheki-add-btn" onclick="openChekiModal()">＋ 新しいチェキを登録する</button>`;
+
+            if (active.length === 0) {
+                html += `<div class="empty">対応中のチェキはありません ✨</div>`;
+            } else {
+                active.forEach(c => { html += renderChekiCard(c); });
+            }
+
+            // 完了済みは折りたたみ
+            if (done.length > 0) {
+                html += `
+                    <div class="cheki-done-section">
+                        <div class="cheki-done-toggle" onclick="toggleChekiDone()">
+                            お渡し完了 (${done.length}) ▶
+                        </div>
+                        <div class="cheki-done-list" id="cheki-done-list">
+                `;
+                done.forEach(c => { html += renderChekiCard(c); });
+                html += `</div></div>`;
+            }
+
+            document.getElementById('cheki-content').innerHTML = html;
+            document.getElementById('cheki-content').classList.remove('loading');
+        }
+
+        function renderChekiCard(cheki) {
+            const statusClass = cheki.status === '作業中' ? 'status-working'
+                              : cheki.status === 'チェキBOX投函' ? 'status-boxed'
+                              : 'status-done';
+            const badgeClass = cheki.status === '作業中' ? 'badge-working'
+                             : cheki.status === 'チェキBOX投函' ? 'badge-boxed'
+                             : 'badge-done';
+            const isDone = cheki.status === 'お渡し完了';
+
+            const noteHtml = cheki.note ? `<div class="cheki-note">📝 ${escapeHtml(cheki.note)}</div>` : '';
+
+            let btnsHtml = '';
+            if (!isDone) {
+                const isBoxed = cheki.status === 'チェキBOX投函';
+                btnsHtml = `
+                    <div class="cheki-status-btns">
+                        <button class="cheki-status-btn btn-box" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'チェキBOX投函')" ${isBoxed ? 'disabled' : ''}>
+                            ${isBoxed ? '✓ BOX投函済み' : '📥 BOX投函'}
+                        </button>
+                        <button class="cheki-status-btn btn-done" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'お渡し完了')">
+                            ✅ お渡し完了
+                        </button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="cheki-card ${statusClass}" id="cheki-card-${cheki.rowIndex}">
+                    <div class="cheki-card-header">
+                        <div class="cheki-customer">${escapeHtml(cheki.customerName)}</div>
+                        <span class="cheki-status-badge ${badgeClass}">${escapeHtml(cheki.status)}</span>
+                    </div>
+                    <div class="cheki-meta">
+                        撮影: ${escapeHtml(cheki.shootDate)}
+                        ${cheki.deliveryDate ? '／ お渡し予定: ' + escapeHtml(cheki.deliveryDate) : ''}
+                        ／ 登録: ${escapeHtml(cheki.createdAt)}
+                    </div>
+                    ${noteHtml}
+                    ${btnsHtml}
+                </div>
+            `;
+        }
+
+        function toggleChekiDone() {
+            const list = document.getElementById('cheki-done-list');
+            if (list) list.classList.toggle('open');
+        }
+
+        function openChekiModal() {
+            // 今日の日付をデフォルトに
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('cheki-customer').value = '';
+            document.getElementById('cheki-shoot-date').value = today;
+            document.getElementById('cheki-delivery-date').value = '';
+            document.getElementById('cheki-note').value = '';
+            document.getElementById('cheki-form-msg').textContent = '';
+            document.getElementById('cheki-modal').classList.add('active');
+        }
+
+        function closeChekiModal() {
+            document.getElementById('cheki-modal').classList.remove('active');
+        }
+
+        async function submitCheki() {
+            const customerName = document.getElementById('cheki-customer').value.trim();
+            const shootDate = document.getElementById('cheki-shoot-date').value;
+            const deliveryDate = document.getElementById('cheki-delivery-date').value;
+            const note = document.getElementById('cheki-note').value.trim();
+            const msgEl = document.getElementById('cheki-form-msg');
+
+            if (!customerName) { msgEl.textContent = 'お客様名を入力してください'; msgEl.className = 'msg msg-err'; return; }
+            if (!shootDate) { msgEl.textContent = '撮影日を入力してください'; msgEl.className = 'msg msg-err'; return; }
+            if (!deliveryDate) { msgEl.textContent = 'お渡し予定日を入力してください'; msgEl.className = 'msg msg-err'; return; }
+
+            msgEl.textContent = '登録中...';
+            msgEl.className = 'msg msg-ok';
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'addCheki',
+                        userId: lineProfile.userId,
+                        customerName, shootDate, deliveryDate, note
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    closeChekiModal();
+                    await loadChekis();
+                } else {
+                    msgEl.textContent = 'エラー: ' + (result.error || '失敗しました');
+                    msgEl.className = 'msg msg-err';
+                }
+            } catch (e) {
+                msgEl.textContent = 'エラー: ' + e.message;
+                msgEl.className = 'msg msg-err';
+            }
+        }
+
+        async function updateChekiStatus(btn, rowIndex, newStatus) {
+            const label = newStatus === 'チェキBOX投函' ? 'BOX投函済みにしますか？' : 'お渡し完了にしますか？';
+            showModal(label, async () => {
+                btn.disabled = true;
+                btn.textContent = '送信中...';
+                try {
+                    const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'updateChekiStatus',
+                            userId: lineProfile.userId,
+                            rowIndex: rowIndex,
+                            status: newStatus
+                        })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        await loadChekis();
+                    } else {
+                        showAlert('エラー: ' + (result.error || '失敗しました'));
+                        btn.disabled = false;
+                        btn.textContent = newStatus === 'チェキBOX投函' ? '📥 BOX投函' : '✅ お渡し完了';
+                    }
+                } catch (e) {
+                    showAlert('エラー: ' + e.message);
+                    btn.disabled = false;
+                }
+            });
         }
 
         // ==========================================
@@ -869,25 +1130,20 @@
                 const url = `${GAS_URL}?action=getShiftRequestForm&userId=${lineProfile.userId}`;
                 const response = await fetch(url);
                 const result = await response.json();
-
                 if (!result.success) {
-                    document.getElementById('shift-request-content').innerHTML = 
-                        `<div class="error">${result.error || 'フォームの取得に失敗しました'}</div>`;
+                    document.getElementById('shift-request-content').innerHTML = `<div class="error">${result.error || 'フォームの取得に失敗しました'}</div>`;
                     return;
                 }
-
                 shiftRequestData = result.data;
                 renderShiftRequestForm();
             } catch (error) {
-                document.getElementById('shift-request-content').innerHTML = 
-                    `<div class="error">エラー: ${error.message}</div>`;
+                document.getElementById('shift-request-content').innerHTML = `<div class="error">エラー: ${error.message}</div>`;
             }
         }
 
         function renderShiftRequestForm() {
             const d = shiftRequestData;
             let html = '';
-
             if (d.isAfterDeadline) {
                 html += `
                     <div class="warning-banner">
@@ -905,24 +1161,19 @@
                     </div>
                 `;
             }
-
             html += `
                 <div class="deadline-info">
                     対象: <strong>${d.period}</strong>分（${d.dates[0].label} 〜 ${d.dates[d.dates.length - 1].label}）<br>
                     📅 締切: <strong>${d.deadlineLabel}</strong>
-                    <div style="font-size: 11px; color: #999; margin-top: 4px;">
-                        出勤しない日は「--」のままにしてください。締切までは何度でも修正可能です。
-                    </div>
+                    <div style="font-size: 11px; color: #999; margin-top: 4px;">出勤しない日は「--」のままにしてください。締切までは何度でも修正可能です。</div>
                 </div>
             `;
-
             html += `<div id="shift-rows">`;
             d.dates.forEach((date, i) => {
                 const existing = d.existingShifts[i] || '';
                 const parts = existing.split('-');
                 const startVal = parts[0] || '';
                 const endVal = parts[1] || '';
-
                 html += `
                     <div class="day-row ${date.isWeekend ? 'weekend' : ''}">
                         <div class="day-label">
@@ -944,7 +1195,6 @@
                 `;
             });
             html += `</div>`;
-
             html += `
                 <label class="note-label">備考（自由記入）</label>
                 <textarea class="note-input" id="shift-note" placeholder="例: 通院のため遅れる可能性あり、◯日は20時以降のみ可など">${escapeHtml(d.existingNote || '')}</textarea>
@@ -952,7 +1202,6 @@
                 <button class="submit-btn" id="shift-submit-btn" onclick="submitShiftRequest()">提出する</button>
                 <div class="msg" id="shift-submit-msg"></div>
             `;
-
             document.getElementById('shift-request-content').innerHTML = html;
             document.getElementById('shift-request-content').classList.remove('loading');
         }
@@ -965,69 +1214,42 @@
             const starts = document.querySelectorAll('.shift-start');
             const ends = document.querySelectorAll('.shift-end');
             const shifts = [];
-
             for (let i = 0; i < starts.length; i++) {
                 const s = starts[i].value;
                 const e = ends[i].value;
-                if ((s && !e) || (!s && e)) {
-                    showShiftMsg(`${i + 1}日目：開始時刻と終了時刻はセットで選択してください`, false);
-                    return;
-                }
-                if (s && e && toMinutes(s) >= toMinutes(e)) {
-                    showShiftMsg(`${i + 1}日目：終了時刻は開始時刻より後にしてください`, false);
-                    return;
-                }
+                if ((s && !e) || (!s && e)) { showShiftMsg(`${i + 1}日目：開始時刻と終了時刻はセットで選択してください`, false); return; }
+                if (s && e && toMinutes(s) >= toMinutes(e)) { showShiftMsg(`${i + 1}日目：終了時刻は開始時刻より後にしてください`, false); return; }
                 shifts.push(s && e ? `${s}-${e}` : '');
             }
-
             const doSubmit = async () => {
                 const btn = document.getElementById('shift-submit-btn');
                 btn.disabled = true;
                 btn.textContent = '送信中...';
                 showShiftMsg('送信中...', true);
-
                 try {
                     const note = document.getElementById('shift-note').value;
                     const response = await fetch(GAS_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            action: 'submitShiftRequest',
-                            lineUserId: lineProfile.userId,
-                            period: shiftRequestData.period,
-                            shifts: shifts,
-                            note: note
-                        })
+                        body: JSON.stringify({ action: 'submitShiftRequest', lineUserId: lineProfile.userId, period: shiftRequestData.period, shifts, note })
                     });
-
                     const result = await response.json();
                     btn.disabled = false;
                     btn.textContent = '提出する';
-
                     if (result.success) {
-                        if (result.data.isAfterDeadline) {
-                            showShiftMsg('⚠️ 提出完了しました（締切後提出として記録されました）', true);
-                        } else {
-                            showShiftMsg('✓ 提出完了しました！', true);
-                        }
+                        showShiftMsg(result.data.isAfterDeadline ? '⚠️ 提出完了しました（締切後提出として記録されました）' : '✓ 提出完了しました！', true);
                         setTimeout(() => loadShiftRequestForm(), 1500);
                     } else {
                         showShiftMsg('エラー: ' + (result.error || '送信に失敗しました'), false);
                     }
                 } catch (error) {
-                    const btn2 = document.getElementById('shift-submit-btn');
-                    btn2.disabled = false;
-                    btn2.textContent = '提出する';
+                    document.getElementById('shift-submit-btn').disabled = false;
+                    document.getElementById('shift-submit-btn').textContent = '提出する';
                     showShiftMsg('エラー: ' + error.message, false);
                 }
             };
-
             if (shiftRequestData.isAfterDeadline) {
-                showModal(
-                    '提出期限を過ぎています。\n\n今回の提出は遅刻として記録され、回数がカウントされます。\n\n本当に提出しますか？',
-                    doSubmit,
-                    { title: '⚠️ 期限超過', okLabel: '提出する', okGreen: true }
-                );
+                showModal('提出期限を過ぎています。\n\n今回の提出は遅刻として記録され、回数がカウントされます。\n\n本当に提出しますか？', doSubmit, { title: '⚠️ 期限超過', okLabel: '提出する', okGreen: true });
             } else {
                 showModal('この内容で提出しますか？', doSubmit, { okLabel: '提出する', okGreen: true });
             }
@@ -1047,12 +1269,7 @@
 
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
         function getStatusTag(status) {
@@ -1067,37 +1284,21 @@
         }
 
         function toggleDay(dayId) {
-            const body = document.getElementById(`${dayId}-body`);
-            const toggle = document.getElementById(`${dayId}-toggle`);
-            body.classList.toggle('open');
-            toggle.classList.toggle('open');
+            document.getElementById(`${dayId}-body`).classList.toggle('open');
+            document.getElementById(`${dayId}-toggle`).classList.toggle('open');
         }
 
         function showNotRegistered(result) {
             document.getElementById('content').innerHTML = `
-                <div class="header-card">
-                    <div class="user-name">${lineProfile.displayName} さん</div>
-                </div>
-                <div class="error">
-                    キャスト名簿に登録されていません。<br>
-                    管理者にお問い合わせください。
-                </div>
-                <div class="section">
-                    <div style="font-size: 11px; color: #999; word-break: break-all;">
-                        LINE User ID: ${lineProfile.userId}
-                    </div>
-                </div>
+                <div class="header-card"><div class="user-name">${lineProfile.displayName} さん</div></div>
+                <div class="error">キャスト名簿に登録されていません。<br>管理者にお問い合わせください。</div>
+                <div class="section"><div style="font-size:11px;color:#999;word-break:break-all;">LINE User ID: ${lineProfile.userId}</div></div>
             `;
             document.getElementById('content').classList.remove('loading');
         }
 
         function showError(error) {
-            document.getElementById('content').innerHTML = `
-                <div class="error">
-                    エラーが発生しました。<br>
-                    <small>${error.message || error}</small>
-                </div>
-            `;
+            document.getElementById('content').innerHTML = `<div class="error">エラーが発生しました。<br><small>${error.message || error}</small></div>`;
             document.getElementById('content').classList.remove('loading');
         }
 
