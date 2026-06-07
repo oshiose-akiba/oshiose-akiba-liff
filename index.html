@@ -385,13 +385,72 @@
             margin-left: 6px;
             vertical-align: middle;
         }
+
+        /* カスタムモーダル */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 14px;
+            padding: 24px 20px 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .modal-msg {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .modal-btn.cancel { background: #f0f0f0; color: #333; }
+        .modal-btn.ok { background: #ff69b4; color: white; }
+        .modal-btn.ok.green { background: #06c755; }
+        .modal-btn.single { background: #ff69b4; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>推し推せ AKIBA</h1>
         <div id="content" class="loading">読み込み中...</div>
-        <div class="footer">推し推せ AKIBA 業務アプリ v0.4</div>
+        <div class="footer">推し推せ AKIBA 業務アプリ v0.5</div>
+    </div>
+
+    <!-- カスタムモーダル -->
+    <div class="modal-overlay" id="custom-modal">
+        <div class="modal-box">
+            <div class="modal-title" id="modal-title">確認</div>
+            <div class="modal-msg" id="modal-msg"></div>
+            <div class="modal-btns" id="modal-btns"></div>
+        </div>
     </div>
 
     <script>
@@ -401,6 +460,45 @@
         let castData = null;
         let lineProfile = null;
         let shiftRequestData = null;
+
+        // ==========================================
+        // カスタムモーダル
+        // ==========================================
+
+        function showModal(msg, onOk, { title = '確認', okLabel = 'OK', cancelLabel = 'キャンセル', okGreen = false } = {}) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-msg').textContent = msg;
+            const btns = document.getElementById('modal-btns');
+            btns.innerHTML = `
+                <button class="modal-btn cancel" id="modal-cancel-btn">${cancelLabel}</button>
+                <button class="modal-btn ok${okGreen ? ' green' : ''}" id="modal-ok-btn">${okLabel}</button>
+            `;
+            const overlay = document.getElementById('custom-modal');
+            overlay.classList.add('active');
+            document.getElementById('modal-ok-btn').onclick = () => {
+                overlay.classList.remove('active');
+                onOk();
+            };
+            document.getElementById('modal-cancel-btn').onclick = () => {
+                overlay.classList.remove('active');
+            };
+        }
+
+        function showAlert(msg, { title = 'エラー' } = {}) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-msg').textContent = msg;
+            const btns = document.getElementById('modal-btns');
+            btns.innerHTML = `<button class="modal-btn single" id="modal-single-btn">OK</button>`;
+            const overlay = document.getElementById('custom-modal');
+            overlay.classList.add('active');
+            document.getElementById('modal-single-btn').onclick = () => {
+                overlay.classList.remove('active');
+            };
+        }
+
+        // ==========================================
+        // メイン
+        // ==========================================
 
         async function main() {
             try {
@@ -522,12 +620,7 @@
                         </div>
                     `;
                 });
-
-                html += `
-                    <div class="summary">
-                        出勤数: <strong>${shifts.length}</strong>日
-                    </div>
-                `;
+                html += `<div class="summary">出勤数: <strong>${shifts.length}</strong>日</div>`;
             }
 
             html += `</div>`;
@@ -549,7 +642,6 @@
             dates.forEach((date, index) => {
                 const casts = akibaData.shiftsByDate[date];
                 if (casts.length === 0) return;
-
                 const dayId = `day-${index}`;
                 html += `
                     <div class="day-group">
@@ -619,7 +711,6 @@
             const pending = result.pending || [];
             const thisMonth = result.thisMonth || [];
 
-            // 未対応バッジ
             const badge = document.getElementById('base-pending-badge');
             if (badge && pending.length > 0) {
                 badge.innerHTML = `<span class="base-pending-count">${pending.length}</span>`;
@@ -636,18 +727,14 @@
                 </div>
             `;
 
-            // 未対応パネル
             html += `<div class="base-panel active" id="panel-pending">`;
             if (pending.length === 0) {
                 html += `<div class="empty">✨ 未対応の注文はありません</div>`;
             } else {
-                pending.forEach(order => {
-                    html += renderBaseOrderCard(order, true);
-                });
+                pending.forEach(order => { html += renderBaseOrderCard(order, true); });
             }
             html += `</div>`;
 
-            // 今月パネル
             html += `<div class="base-panel" id="panel-thismonth">`;
             if (thisMonth.length === 0) {
                 html += `<div class="empty">今月の注文はありません</div>`;
@@ -664,45 +751,43 @@
         }
 
         function renderBaseOrderCard(order, showBtn) {
-    const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment'
-                       : order.paymentStatus === 'キャンセル' ? 'done'
-                       : 'waiting';
+            const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment'
+                               : order.paymentStatus === 'キャンセル' ? 'done'
+                               : 'waiting';
+            const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid'
+                             : order.paymentStatus === 'キャンセル' ? 'badge-cancel'
+                             : 'badge-paid';
+            const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
+            const cardClass = isDone ? 'done' : paymentClass;
 
-    const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid'
-                     : order.paymentStatus === 'キャンセル' ? 'badge-cancel'
-                     : 'badge-paid';
+            const subtotalDisplay = (order.subtotal !== '' && order.subtotal !== null && !isNaN(Number(order.subtotal)) && Number(order.subtotal) > 0)
+                ? '¥' + Number(order.subtotal).toLocaleString()
+                : '¥-';
 
-    const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
-    const cardClass = isDone ? 'done' : paymentClass;
+            let btnHtml = '';
+            if (isDone) {
+                btnHtml = `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`;
+            } else if (showBtn) {
+                btnHtml = `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>`;
+            }
 
-    const subtotalDisplay = (order.subtotal !== '' && order.subtotal !== null && !isNaN(Number(order.subtotal)))
-        ? '¥' + Number(order.subtotal).toLocaleString()
-        : '¥-';
+            const noteHtml = order.note
+                ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>`
+                : '';
 
-    let btnHtml = '';
-    if (isDone) {
-        btnHtml = `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`;
-    } else if (showBtn) {
-        btnHtml = `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>`;
-    }
-
-    const noteHtml = order.note
-        ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>`
-        : '';
-
-    return `
-        <div class="base-order-card ${cardClass}" id="order-card-${order.rowIndex}">
-            <div class="base-order-meta">
-                <span class="base-order-id">${escapeHtml(order.orderDateStr)} / ${escapeHtml(order.orderId)}</span>
-                <span class="base-payment-badge ${badgeClass}">${escapeHtml(order.paymentStatus)}</span>
-            </div>
-            <div class="base-order-product">${escapeHtml(order.productName)} × ${order.quantity}</div>
-            <div class="base-order-sub">呼び名: ${escapeHtml(order.yobiName)} ／ ${subtotalDisplay}</div>
-            ${noteHtml}
-            ${btnHtml}
-        </div>
-    `;
-}
+            return `
+                <div class="base-order-card ${cardClass}" id="order-card-${order.rowIndex}">
+                    <div class="base-order-meta">
+                        <span class="base-order-id">${escapeHtml(order.orderDateStr)} / ${escapeHtml(order.orderId)}</span>
+                        <span class="base-payment-badge ${badgeClass}">${escapeHtml(order.paymentStatus)}</span>
+                    </div>
+                    <div class="base-order-product">${escapeHtml(order.productName)} × ${order.quantity}</div>
+                    <div class="base-order-sub">呼び名: ${escapeHtml(order.yobiName)} ／ ${subtotalDisplay}</div>
+                    ${noteHtml}
+                    ${btnHtml}
+                </div>
+            `;
+        }
 
         function switchBaseTab(tab) {
             document.querySelectorAll('.base-tab').forEach(el => el.classList.remove('active'));
@@ -712,62 +797,57 @@
         }
 
         async function markHandled(btn, rowIndex) {
-            if (!confirm('この注文を対応済みにしますか？')) return;
+            showModal('この注文を対応済みにしますか？', async () => {
+                btn.disabled = true;
+                btn.textContent = '送信中...';
 
-            btn.disabled = true;
-            btn.textContent = '送信中...';
+                try {
+                    const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'markBaseOrderHandled',
+                            userId: lineProfile.userId,
+                            rowIndex: rowIndex
+                        })
+                    });
 
-            try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'markBaseOrderHandled',
-                        userId: lineProfile.userId,
-                        rowIndex: rowIndex
-                    })
-                });
+                    const result = await response.json();
 
-                const result = await response.json();
-
-                if (result.success) {
-                    // カードをアニメーションで完了状態に
-                    const card = document.getElementById(`order-card-${rowIndex}`);
-                    if (card) {
-                        card.classList.add('handled-anim');
-                        setTimeout(() => {
-                            card.classList.remove('base-order-card', 'pending-payment', 'waiting', 'handled-anim');
-                            card.classList.add('base-order-card', 'done');
-                            card.style.opacity = '';
-                            card.style.transform = '';
-                            btn.className = 'base-handle-btn done-btn';
-                            btn.disabled = true;
-                            btn.textContent = '✓ 対応済み';
-                            // 未対応タブのカウント更新
-                            refreshBaseTabCounts();
-                        }, 300);
+                    if (result.success) {
+                        const card = document.getElementById(`order-card-${rowIndex}`);
+                        if (card) {
+                            card.classList.add('handled-anim');
+                            setTimeout(() => {
+                                card.classList.remove('base-order-card', 'pending-payment', 'waiting', 'handled-anim');
+                                card.classList.add('base-order-card', 'done');
+                                card.style.opacity = '';
+                                card.style.transform = '';
+                                btn.className = 'base-handle-btn done-btn';
+                                btn.disabled = true;
+                                btn.textContent = '✓ 対応済み';
+                                refreshBaseTabCounts();
+                            }, 300);
+                        }
+                    } else {
+                        showAlert('エラー: ' + (result.error || '失敗しました'));
+                        btn.disabled = false;
+                        btn.textContent = '対応完了にする';
                     }
-                } else {
-                    alert('エラー: ' + (result.error || '失敗しました'));
+                } catch (e) {
+                    showAlert('エラー: ' + e.message);
                     btn.disabled = false;
                     btn.textContent = '対応完了にする';
                 }
-            } catch (e) {
-                alert('エラー: ' + e.message);
-                btn.disabled = false;
-                btn.textContent = '対応完了にする';
-            }
+            });
         }
 
         function refreshBaseTabCounts() {
-            // 未対応パネル内のdone以外のカード数を数え直す
             const pendingPanel = document.getElementById('panel-pending');
             if (!pendingPanel) return;
             const remaining = pendingPanel.querySelectorAll('.base-order-card:not(.done)').length;
             const tabEl = document.getElementById('tab-pending');
-            if (tabEl) {
-                tabEl.textContent = `未対応${remaining > 0 ? ` (${remaining})` : ''}`;
-            }
+            if (tabEl) tabEl.textContent = `未対応${remaining > 0 ? ` (${remaining})` : ''}`;
             const badge = document.getElementById('base-pending-badge');
             if (badge) {
                 badge.innerHTML = remaining > 0
@@ -869,9 +949,6 @@
                 <label class="note-label">備考（自由記入）</label>
                 <textarea class="note-input" id="shift-note" placeholder="例: 通院のため遅れる可能性あり、◯日は20時以降のみ可など">${escapeHtml(d.existingNote || '')}</textarea>
                 <div style="font-size: 11px; color: #888; margin-top: 4px;">伝えたいことがあれば自由に記入してください。</div>
-            `;
-
-            html += `
                 <button class="submit-btn" id="shift-submit-btn" onclick="submitShiftRequest()">提出する</button>
                 <div class="msg" id="shift-submit-msg"></div>
             `;
@@ -903,52 +980,56 @@
                 shifts.push(s && e ? `${s}-${e}` : '');
             }
 
-            if (shiftRequestData.isAfterDeadline) {
-                const warn = '⚠️ 警告 ⚠️\n\n提出期限を過ぎています。\n\n今回の提出は遅刻として記録され、回数がカウントされます。\n\n本当に提出しますか？';
-                if (!confirm(warn)) return;
-            } else {
-                if (!confirm('この内容で提出しますか？')) return;
-            }
+            const doSubmit = async () => {
+                const btn = document.getElementById('shift-submit-btn');
+                btn.disabled = true;
+                btn.textContent = '送信中...';
+                showShiftMsg('送信中...', true);
 
-            const btn = document.getElementById('shift-submit-btn');
-            btn.disabled = true;
-            btn.textContent = '送信中...';
-            showShiftMsg('送信中...', true);
+                try {
+                    const note = document.getElementById('shift-note').value;
+                    const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'submitShiftRequest',
+                            lineUserId: lineProfile.userId,
+                            period: shiftRequestData.period,
+                            shifts: shifts,
+                            note: note
+                        })
+                    });
 
-            try {
-                const note = document.getElementById('shift-note').value;
-                
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'submitShiftRequest',
-                        lineUserId: lineProfile.userId,
-                        period: shiftRequestData.period,
-                        shifts: shifts,
-                        note: note
-                    })
-                });
+                    const result = await response.json();
+                    btn.disabled = false;
+                    btn.textContent = '提出する';
 
-                const result = await response.json();
-                
-                btn.disabled = false;
-                btn.textContent = '提出する';
-
-                if (result.success) {
-                    if (result.data.isAfterDeadline) {
-                        showShiftMsg('⚠️ 提出完了しました（締切後提出として記録されました）', true);
+                    if (result.success) {
+                        if (result.data.isAfterDeadline) {
+                            showShiftMsg('⚠️ 提出完了しました（締切後提出として記録されました）', true);
+                        } else {
+                            showShiftMsg('✓ 提出完了しました！', true);
+                        }
+                        setTimeout(() => loadShiftRequestForm(), 1500);
                     } else {
-                        showShiftMsg('✓ 提出完了しました！', true);
+                        showShiftMsg('エラー: ' + (result.error || '送信に失敗しました'), false);
                     }
-                    setTimeout(() => loadShiftRequestForm(), 1500);
-                } else {
-                    showShiftMsg('エラー: ' + (result.error || '送信に失敗しました'), false);
+                } catch (error) {
+                    const btn2 = document.getElementById('shift-submit-btn');
+                    btn2.disabled = false;
+                    btn2.textContent = '提出する';
+                    showShiftMsg('エラー: ' + error.message, false);
                 }
-            } catch (error) {
-                btn.disabled = false;
-                btn.textContent = '提出する';
-                showShiftMsg('エラー: ' + error.message, false);
+            };
+
+            if (shiftRequestData.isAfterDeadline) {
+                showModal(
+                    '提出期限を過ぎています。\n\n今回の提出は遅刻として記録され、回数がカウントされます。\n\n本当に提出しますか？',
+                    doSubmit,
+                    { title: '⚠️ 期限超過', okLabel: '提出する', okGreen: true }
+                );
+            } else {
+                showModal('この内容で提出しますか？', doSubmit, { okLabel: '提出する', okGreen: true });
             }
         }
 
@@ -959,6 +1040,7 @@
 
         function showShiftMsg(text, ok) {
             const msg = document.getElementById('shift-submit-msg');
+            if (!msg) return;
             msg.textContent = text;
             msg.className = 'msg ' + (ok ? 'msg-ok' : 'msg-err');
         }
