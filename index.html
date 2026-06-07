@@ -664,42 +664,45 @@
         }
 
         function renderBaseOrderCard(order, showBtn) {
-            const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment'
-                               : order.paymentStatus === 'キャンセル' ? 'done'
-                               : 'waiting';
+    const paymentClass = order.paymentStatus === '入金待ち' ? 'pending-payment'
+                       : order.paymentStatus === 'キャンセル' ? 'done'
+                       : 'waiting';
 
-            const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid'
-                             : order.paymentStatus === 'キャンセル' ? 'badge-cancel'
-                             : 'badge-paid';
+    const badgeClass = order.paymentStatus === '入金待ち' ? 'badge-unpaid'
+                     : order.paymentStatus === 'キャンセル' ? 'badge-cancel'
+                     : 'badge-paid';
 
-            const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
+    const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
+    const cardClass = isDone ? 'done' : paymentClass;
 
-            const cardClass = isDone ? 'done' : paymentClass;
+    const subtotalDisplay = (order.subtotal !== '' && order.subtotal !== null && !isNaN(Number(order.subtotal)))
+        ? '¥' + Number(order.subtotal).toLocaleString()
+        : '¥-';
 
-            let btnHtml = '';
-            if (isDone) {
-                btnHtml = `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`;
-            } else if (showBtn) {
-                btnHtml = `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>`;
-            }
+    let btnHtml = '';
+    if (isDone) {
+        btnHtml = `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`;
+    } else if (showBtn) {
+        btnHtml = `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>`;
+    }
 
-            const noteHtml = order.note
-                ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>`
-                : '';
+    const noteHtml = order.note
+        ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>`
+        : '';
 
-            return `
-                <div class="base-order-card ${cardClass}" id="order-card-${order.rowIndex}">
-                    <div class="base-order-meta">
-                        <span class="base-order-id">${escapeHtml(order.orderDateStr)} / ${escapeHtml(order.orderId)}</span>
-                        <span class="base-payment-badge ${badgeClass}">${escapeHtml(order.paymentStatus)}</span>
-                    </div>
-                    <div class="base-order-product">${escapeHtml(order.productName)} × ${order.quantity}</div>
-                    <div class="base-order-sub">呼び名: ${escapeHtml(order.yobiName)} ／ ¥${Number(order.subtotal).toLocaleString()}</div>
-                    ${noteHtml}
-                    ${btnHtml}
-                </div>
-            `;
-        }
+    return `
+        <div class="base-order-card ${cardClass}" id="order-card-${order.rowIndex}">
+            <div class="base-order-meta">
+                <span class="base-order-id">${escapeHtml(order.orderDateStr)} / ${escapeHtml(order.orderId)}</span>
+                <span class="base-payment-badge ${badgeClass}">${escapeHtml(order.paymentStatus)}</span>
+            </div>
+            <div class="base-order-product">${escapeHtml(order.productName)} × ${order.quantity}</div>
+            <div class="base-order-sub">呼び名: ${escapeHtml(order.yobiName)} ／ ${subtotalDisplay}</div>
+            ${noteHtml}
+            ${btnHtml}
+        </div>
+    `;
+}
 
         function switchBaseTab(tab) {
             document.querySelectorAll('.base-tab').forEach(el => el.classList.remove('active'));
