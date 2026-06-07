@@ -519,7 +519,7 @@
             </div>
         </div>
 
-        <div class="footer">推し推せ AKIBA 業務アプリ v0.7</div>
+        
     </div>
 
     <!-- タブバー -->
@@ -653,25 +653,28 @@
         // ホーム & シフト
         // ==========================================
         async function loadHomeAndShift() {
-            try {
-                const isManager = castData.isManager;
-                let shiftResult;
+    try {
+        const isManager = castData.isManager;
+        let shiftResult;
 
-                if (isManager) {
-                    shiftResult = await fetch(`${GAS_URL}?action=getAllShifts`).then(r => r.json());
-                } else {
-                    shiftResult = await fetch(`${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`).then(r => r.json());
-                }
-                cachedShiftData = shiftResult;
-
-                renderHome();
-                renderShiftTab(isManager);
-                await loadShiftRequestForm();
-
-            } catch (e) {
-                document.getElementById('home-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
-            }
+        if (isManager) {
+            shiftResult = await fetch(`${GAS_URL}?action=getAllShifts`).then(r => r.json());
+        } else {
+            shiftResult = await fetch(`${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`).then(r => r.json());
         }
+        cachedShiftData = shiftResult;
+
+        renderHome();
+        renderShiftTab(isManager);
+        await loadShiftRequestForm();
+
+        // renderHome()の後にサマリー更新
+        updateHomeSummary();
+
+    } catch (e) {
+        document.getElementById('home-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
+    }
+}
 
         function renderHome() {
             const isManager = castData.isManager;
