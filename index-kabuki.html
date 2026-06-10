@@ -589,6 +589,58 @@
     cursor: pointer;
 }
 .notice-post-btn:disabled { background: #ccc; }
+        /* ==================== MTGご飯会 ==================== */
+.mtg-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 16px;
+    margin-bottom: 16px;
+    border-left: 4px solid #4FC3F7;
+}
+.mtg-card.after-deadline { border-left-color: #ccc; }
+.mtg-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+.mtg-meta {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+    line-height: 1.8;
+}
+.mtg-answer-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+.mtg-answer-badge.attend { background: #e8f5e9; color: #2e7d32; }
+.mtg-answer-badge.absent { background: #ffebee; color: #c62828; }
+.mtg-answer-badge.auto { background: #eeeeee; color: #757575; }
+.mtg-btns {
+    display: flex;
+    gap: 8px;
+}
+.mtg-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.mtg-btn.attend { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; }
+.mtg-btn.absent { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; }
+.mtg-btn.selected-attend { background: #2e7d32; color: white; border: 2px solid #2e7d32; }
+.mtg-btn.selected-absent { background: #c62828; color: white; border: 2px solid #c62828; }
+.mtg-btn:disabled { opacity: 0.5; cursor: default; }
     </style>
 </head>
 <body>
@@ -773,6 +825,8 @@
 
         // renderHome()でnotices-areaが生成された後に実行
         await loadNotices();
+        
+        await loadMtgInfo();
 
     } catch (e) {
         document.getElementById('home-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
@@ -827,8 +881,9 @@
             <div class="home-summary-label">対応中 宿題チェキ</div>
         </div>
     </div>
-    <div id="notices-area"></div>
-    <div class="footer">推し推せ KABUKI 業務アプリ v0.8</div>
+   <div id="mtg-area"></div>
+<div id="notices-area"></div>
+    <div class="footer">推し推せ KABUKI 業務アプリ v0.9</div>
 `;
 
             document.getElementById('home-content').innerHTML = html;
@@ -1347,6 +1402,104 @@
             document.getElementById(`${dayId}-toggle`).classList.toggle('open');
         }
 
+// ==========================================
+// MTGご飯会参加確認
+// ==========================================
+async function loadMtgInfo() {
+    try {
+        const result = await fetch(`${GAS_URL}?action=getMtgInfo&userId=${lineProfile.userId}`).then(r => r.json());
+        if (!result.success || !result.data) return;
+        renderMtgCard(result.data);
+    } catch (e) {
+        // サイレントに失敗
+    }
+}
+
+function renderMtgCard(data) {
+    const area = document.getElementById('mtg-area');
+    if (!area) return;
+
+    const mtg = data.mtg;
+    const myAnswer = data.myAnswer;
+
+    const cardClass = mtg.isAfterDeadline ? 'mtg-card after-deadline' : 'mtg-card';
+
+    let answerHtml = '';
+    let btnsHtml = '';
+
+    if (myAnswer) {
+        const badgeClass = myAnswer.answer === '参加' ? 'attend'
+                         : myAnswer.answer === '不参加' ? 'absent'
+                         : 'auto';
+        const badgeLabel = myAnswer.answer === '参加（自動）'
+            ? '参加（自動登録）'
+            : myAnswer.answer;
+        answerHtml = `<div class="mtg-answer-badge ${badgeClass}">${escapeHtml(badgeLabel)}</div>`;
+        if (myAnswer.answeredAt) {
+            answerHtml += `<div style="font-size:11px;color:#aaa;margin-bottom:10px;">回答日時: ${escapeHtml(myAnswer.answeredAt)}</div>`;
+        }
+    }
+
+    // 締切前は回答・変更ボタンを表示
+    if (!mtg.isAfterDeadline) {
+        const attendSelected = myAnswer && myAnswer.answer === '参加';
+        const absentSelected = myAnswer && myAnswer.answer === '不参加';
+        btnsHtml = `
+            <div class="mtg-btns">
+                <button class="mtg-btn ${attendSelected ? 'selected-attend' : 'attend'}"
+                    onclick="submitMtgAnswer('参加', this)">
+                    🍽️ 参加する
+                </button>
+                <button class="mtg-btn ${absentSelected ? 'selected-absent' : 'absent'}"
+                    onclick="submitMtgAnswer('不参加', this)">
+                    🙏 不参加
+                </button>
+            </div>
+        `;
+    } else if (!myAnswer) {
+        btnsHtml = `<div style="font-size:12px;color:#aaa;">締切を過ぎたため参加として登録されました</div>`;
+    }
+
+    area.innerHTML = `
+        <div class="${cardClass}">
+            <div class="mtg-title">🍽️ MTGご飯会 参加確認</div>
+            <div class="mtg-meta">
+                📅 開催日：${escapeHtml(mtg.mtgDate)}<br>
+                ⏰ 締切：${escapeHtml(mtg.deadline)}
+                ${mtg.note ? '<br>📝 ' + escapeHtml(mtg.note) : ''}
+            </div>
+            ${answerHtml}
+            ${btnsHtml}
+            <div class="msg" id="mtg-msg" style="margin-top:8px;min-height:18px;"></div>
+        </div>
+    `;
+}
+
+async function submitMtgAnswer(answer, btn) {
+    const btns = document.querySelectorAll('.mtg-btn');
+    btns.forEach(b => b.disabled = true);
+    const msgEl = document.getElementById('mtg-msg');
+    if (msgEl) { msgEl.textContent = '送信中...'; msgEl.className = 'msg msg-ok'; }
+
+    try {
+        const result = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'submitMtgAnswer', userId: lineProfile.userId, answer })
+        }).then(r => r.json());
+
+        if (result.success) {
+            await loadMtgInfo();
+        } else {
+            btns.forEach(b => b.disabled = false);
+            if (msgEl) { msgEl.textContent = 'エラー: ' + (result.error || '失敗しました'); msgEl.className = 'msg msg-err'; }
+        }
+    } catch (e) {
+        btns.forEach(b => b.disabled = false);
+        if (msgEl) { msgEl.textContent = 'エラー: ' + e.message; msgEl.className = 'msg msg-err'; }
+    }
+}
+        
 // ==========================================
 // お知らせ
 // ==========================================
