@@ -937,11 +937,11 @@
             html = `<div class="section"><div class="empty">シフトデータがありません</div></div>`;
         } else {
             if (kabukiData && kabukiData.shiftsByDate) {
-                html += renderAllShiftsSection(kabukiData);
-            }
-            if (akibaData && akibaData.shiftsByDate) {
-                html += renderAllShiftsSection(akibaData);
-            }
+    html += renderAllShiftsSection(kabukiData, 'kabuki-');
+}
+if (akibaData && akibaData.shiftsByDate) {
+    html += renderAllShiftsSection(akibaData, 'akiba-');
+}
         }
     }
 } else {
@@ -985,34 +985,34 @@
             return html;
         }
 
-        function renderAllShiftsSection(akibaData) {
-            const dates = Object.keys(akibaData.shiftsByDate);
-            const totalShifts = dates.reduce((sum, d) => sum + akibaData.shiftsByDate[d].length, 0);
-            let html = `
-                <div class="section">
-                    <div class="section-title">📅 全体シフト（${akibaData.sheetName}）</div>
-                    <div class="summary">対象期間: ${dates.length}日 / 延べ出勤: <strong>${totalShifts}</strong>名</div>
-            `;
-            dates.forEach((date, index) => {
-                const casts = akibaData.shiftsByDate[date];
-                if (casts.length === 0) return;
-                const dayId = `day-${index}`;
-                html += `
-                    <div class="day-group">
-                        <div class="day-header" onclick="toggleDay('${dayId}')">
-                            <span>${date} - ${casts.length}名</span>
-                            <span class="day-toggle" id="${dayId}-toggle">▶</span>
-                        </div>
-                        <div class="day-body" id="${dayId}-body">
-                `;
-                casts.forEach(c => {
-                    html += `<div class="cast-line"><span>${c.name}</span><span style="color:#666;">${c.start} - ${c.end}</span></div>`;
-                });
-                html += `</div></div>`;
-            });
-            html += `</div>`;
-            return html;
-        }
+        function renderAllShiftsSection(shiftData, prefix = '') {
+    const dates = Object.keys(shiftData.shiftsByDate);
+    const totalShifts = dates.reduce((sum, d) => sum + shiftData.shiftsByDate[d].length, 0);
+    let html = `
+        <div class="section">
+            <div class="section-title">📅 全体シフト（${shiftData.sheetName}）</div>
+            <div class="summary">対象期間: ${dates.length}日 / 延べ出勤: <strong>${totalShifts}</strong>名</div>
+    `;
+    dates.forEach((date, index) => {
+        const casts = shiftData.shiftsByDate[date];
+        if (casts.length === 0) return;
+        const dayId = `${prefix}day-${index}`;
+        html += `
+            <div class="day-group">
+                <div class="day-header" onclick="toggleDay('${dayId}')">
+                    <span>${date} - ${casts.length}名</span>
+                    <span class="day-toggle" id="${dayId}-toggle">▶</span>
+                </div>
+                <div class="day-body" id="${dayId}-body">
+        `;
+        casts.forEach(c => {
+            html += `<div class="cast-line"><span>${c.name}</span><span style="color:#666;">${c.start} - ${c.end}</span></div>`;
+        });
+        html += `</div></div>`;
+    });
+    html += `</div>`;
+    return html;
+}
 
         // ==========================================
         // シフト希望提出
