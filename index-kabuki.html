@@ -928,17 +928,23 @@
         function renderShiftTab(isManager) {
             let html = '';
             if (isManager) {
-                if (!cachedShiftData || !cachedShiftData.success) {
-                    html = `<div class="error">全体シフトの取得に失敗しました</div>`;
-                } else {
-                    const akibaData = cachedShiftData.data.current.akiba;
-                    if (!akibaData || !akibaData.shiftsByDate) {
-                        html = `<div class="section"><div class="empty">シフトデータがありません</div></div>`;
-                    } else {
-                        html = renderAllShiftsSection(akibaData);
-                    }
-                }
-            } else {
+    if (!cachedShiftData || !cachedShiftData.success) {
+        html = `<div class="error">全体シフトの取得に失敗しました</div>`;
+    } else {
+        const kabukiData = cachedShiftData.data.current.kabuki;
+        const akibaData = cachedShiftData.data.current.akiba;
+        if (!kabukiData && !akibaData) {
+            html = `<div class="section"><div class="empty">シフトデータがありません</div></div>`;
+        } else {
+            if (kabukiData && kabukiData.shiftsByDate) {
+                html += renderAllShiftsSection(kabukiData);
+            }
+            if (akibaData && akibaData.shiftsByDate) {
+                html += renderAllShiftsSection(akibaData);
+            }
+        }
+    }
+} else {
                 if (!cachedShiftData || !cachedShiftData.success) {
                     html = `<div class="error">${escapeHtml(cachedShiftData?.error || 'シフトの取得に失敗しました')}</div>`;
                 } else {
