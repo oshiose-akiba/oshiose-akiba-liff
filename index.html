@@ -453,6 +453,18 @@
         .cheki-form-label { display: block; font-size: 12px; font-weight: bold; color: #666; margin-bottom: 4px; }
         .cheki-form-input { width: 100%; padding: 9px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; background: #fff; }
         .cheki-form-input:focus { border-color: #ff69b4; outline: none; }
+        /* チェキ色分け・管理者用 */
+        .cheki-card.days-red { border-left: 4px solid #f44336 !important; background: #fff8f8 !important; }
+        .cheki-card.days-yellow { border-left: 4px solid #ff9800 !important; background: #fffbf5 !important; }
+        .cheki-cast-label { font-size: 11px; color: #888; margin-bottom: 4px; font-weight: bold; }
+        .cheki-days-badge { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 8px; margin-left: 6px; }
+        .cheki-days-badge.red { background: #ffebee; color: #c62828; }
+        .cheki-days-badge.yellow { background: #fff3e0; color: #e65100; }
+        .cheki-days-badge.normal { background: #eee; color: #666; }
+        .cheki-edit-btn { background: none; border: 1px solid #ddd; color: #666; font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
+        .cheki-filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .cheki-filter-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; background: #fafafa; color: #888; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .cheki-filter-btn.active { background: #ff69b4; color: white; border-color: #ff69b4; }
 
         /* ==================== 共通 ==================== */
         .loading { text-align: center; color: #999; padding: 40px 0; }
@@ -730,6 +742,26 @@
             <div class="msg" id="cheki-form-msg" style="margin-top:10px;"></div>
         </div>
     </div>
+
+    <!-- チェキ編集モーダル -->
+<div class="modal-overlay" id="cheki-edit-modal">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-title">✏️ チェキ編集</div>
+        <div class="cheki-form-row">
+            <label class="cheki-form-label">お渡し予定日</label>
+            <input class="cheki-form-input" id="cheki-edit-delivery-date" type="date">
+        </div>
+        <div class="cheki-form-row">
+            <label class="cheki-form-label">備考</label>
+            <input class="cheki-form-input" id="cheki-edit-note" type="text" placeholder="例: 落書き3枚">
+        </div>
+        <div class="modal-btns" style="margin-top:12px;">
+            <button class="modal-btn cancel" onclick="closeChekiEditModal()">キャンセル</button>
+            <button class="modal-btn ok green" onclick="submitChekiEdit()">保存する</button>
+        </div>
+        <div class="msg" id="cheki-edit-msg" style="margin-top:10px;"></div>
+    </div>
+</div>
 
     <script>
         const LIFF_ID = '2010239964-vlVhNnKz';
@@ -1269,55 +1301,154 @@
         }
 
         function renderChekis(data) {
-            const active = data.active || [];
-            const done = data.done || [];
-            let html = `<button class="cheki-add-btn" onclick="openChekiModal()">＋ 新しいチェキを登録する</button>`;
-            if (active.length === 0) { html += `<div class="empty">対応中のチェキはありません ✨</div>`; }
-            else { active.forEach(c => { html += renderChekiCard(c); }); }
-            if (done.length > 0) {
-                html += `<div class="cheki-done-toggle" onclick="toggleChekiDone()">お渡し完了 (${done.length}) ▶</div><div class="cheki-done-list" id="cheki-done-list">`;
-                done.forEach(c => { html += renderChekiCard(c); });
-                html += `</div>`;
-            }
-            document.getElementById('cheki-content').innerHTML = html;
-            document.getElementById('cheki-content').classList.remove('loading');
-        }
+    const active = data.active || [];
+    const done = data.done || [];
+    const isManager = data.isManager;
 
-        function renderChekiCard(cheki) {
-            const statusClass = cheki.status === '作業中' ? 'status-working' : cheki.status === 'チェキBOX投函' ? 'status-boxed' : 'status-done';
-            const badgeClass = cheki.status === '作業中' ? 'badge-working' : cheki.status === 'チェキBOX投函' ? 'badge-boxed' : 'badge-done';
-            const isDone = cheki.status === 'お渡し完了';
-            const isBoxed = cheki.status === 'チェキBOX投函';
-            const noteHtml = cheki.note ? `<div class="cheki-note">📝 ${escapeHtml(cheki.note)}</div>` : '';
-            const btnsHtml = isDone ? '' : `
-                <div class="cheki-status-btns">
-                    <button class="cheki-status-btn btn-box" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'チェキBOX投函')" ${isBoxed ? 'disabled' : ''}>
-                        ${isBoxed ? '✓ BOX投函済み' : '📥 BOX投函'}
-                    </button>
-                    <button class="cheki-status-btn btn-done" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'お渡し完了')">✅ お渡し完了</button>
+    let html = `<button class="cheki-add-btn" onclick="openChekiModal()">＋ 新しいチェキを登録する</button>`;
+
+    if (isManager) {
+        html += `
+            <div class="cheki-filter-bar">
+                <button class="cheki-filter-btn active" onclick="filterChekis('all', event)">すべて</button>
+                <button class="cheki-filter-btn" onclick="filterChekis('red', event)">🔴 10日以上</button>
+                <button class="cheki-filter-btn" onclick="filterChekis('yellow', event)">🟡 7〜9日</button>
+            </div>
+        `;
+    }
+
+    if (active.length === 0) {
+        html += `<div class="empty">対応中のチェキはありません ✨</div>`;
+    } else {
+        active.forEach(c => { html += renderChekiCard(c, isManager); });
+    }
+
+    if (done.length > 0) {
+        html += `<div class="cheki-done-toggle" onclick="toggleChekiDone()">お渡し完了 (${done.length}) ▶</div><div class="cheki-done-list" id="cheki-done-list">`;
+        done.forEach(c => { html += renderChekiCard(c, isManager); });
+        html += `</div>`;
+    }
+
+    document.getElementById('cheki-content').innerHTML = html;
+    document.getElementById('cheki-content').classList.remove('loading');
+}
+
+        function renderChekiCard(cheki, isManager) {
+    const statusClass = cheki.status === '作業中' ? 'status-working' : cheki.status === 'チェキBOX投函' ? 'status-boxed' : 'status-done';
+    const badgeClass = cheki.status === '作業中' ? 'badge-working' : cheki.status === 'チェキBOX投函' ? 'badge-boxed' : 'badge-done';
+    const isDone = cheki.status === 'お渡し完了';
+    const isBoxed = cheki.status === 'チェキBOX投函';
+
+    let daysClass = '';
+    let daysBadgeClass = 'normal';
+    if (!isDone) {
+        if (cheki.daysSince >= 10) { daysClass = 'days-red'; daysBadgeClass = 'red'; }
+        else if (cheki.daysSince >= 7) { daysClass = 'days-yellow'; daysBadgeClass = 'yellow'; }
+    }
+
+    const noteHtml = cheki.note ? `<div class="cheki-note">📝 ${escapeHtml(cheki.note)}</div>` : '';
+    const castLabel = isManager ? `<div class="cheki-cast-label">👤 ${escapeHtml(cheki.castName)}</div>` : '';
+    const daysBadge = !isDone ? `<span class="cheki-days-badge ${daysBadgeClass}">${cheki.daysSince}日</span>` : '';
+    const editBtn = !isDone ? `<button class="cheki-edit-btn" onclick="openChekiEditModal(${cheki.rowIndex}, '${cheki.deliveryDate || ''}', ${JSON.stringify(cheki.note || '')})">✏️ 編集</button>` : '';
+    const deliveryHtml = cheki.deliveryDate
+        ? 'お渡し予定: ' + escapeHtml(cheki.deliveryDate)
+        : '<span style="color:#f44336;font-size:11px;">お渡し予定日未設定</span>';
+
+    const btnsHtml = isDone ? '' : `
+        <div class="cheki-status-btns">
+            <button class="cheki-status-btn btn-box" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'チェキBOX投函')" ${isBoxed ? 'disabled' : ''}>
+                ${isBoxed ? '✓ BOX投函済み' : '📥 BOX投函'}
+            </button>
+            <button class="cheki-status-btn btn-done" onclick="updateChekiStatus(this, ${cheki.rowIndex}, 'お渡し完了')">✅ お渡し完了</button>
+        </div>
+    `;
+
+    return `
+        <div class="cheki-card ${statusClass} ${daysClass}" id="cheki-card-${cheki.rowIndex}" data-days="${cheki.daysSince}" data-cast="${escapeHtml(cheki.castName)}">
+            ${castLabel}
+            <div class="cheki-card-header">
+                <div class="cheki-customer">${escapeHtml(cheki.customerName)}${daysBadge}</div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    ${editBtn}
+                    <span class="cheki-status-badge ${badgeClass}">${escapeHtml(cheki.status)}</span>
                 </div>
-            `;
-            return `
-                <div class="cheki-card ${statusClass}" id="cheki-card-${cheki.rowIndex}">
-                    <div class="cheki-card-header">
-                        <div class="cheki-customer">${escapeHtml(cheki.customerName)}</div>
-                        <span class="cheki-status-badge ${badgeClass}">${escapeHtml(cheki.status)}</span>
-                    </div>
-                    <div class="cheki-meta">
-                        撮影: ${escapeHtml(cheki.shootDate)}
-                        ${cheki.deliveryDate ? '／ お渡し予定: ' + escapeHtml(cheki.deliveryDate) : ''}
-                        ／ 登録: ${escapeHtml(cheki.createdAt)}
-                    </div>
-                    ${noteHtml}${btnsHtml}
-                </div>
-            `;
-        }
+            </div>
+            <div class="cheki-meta">
+                撮影: ${escapeHtml(cheki.shootDate || '未設定')}
+                ／ ${deliveryHtml}
+                ／ 登録: ${escapeHtml(cheki.createdAt)}
+            </div>
+            ${noteHtml}${btnsHtml}
+        </div>
+    `;
+}
 
         function toggleChekiDone() {
             const list = document.getElementById('cheki-done-list');
             if (list) list.classList.toggle('open');
         }
 
+        function filterChekis(filter, e) {
+    document.querySelectorAll('.cheki-filter-btn').forEach(btn => btn.classList.remove('active'));
+    if (e && e.target) e.target.classList.add('active');
+    const cards = document.querySelectorAll('#cheki-content .cheki-card');
+    cards.forEach(card => {
+        const days = parseInt(card.dataset.days || 0);
+        let show = true;
+        if (filter === 'red') show = days >= 10;
+        else if (filter === 'yellow') show = days >= 7 && days < 10;
+        card.style.display = show ? '' : 'none';
+    });
+}
+
+let currentEditRowIndex = null;
+
+function openChekiEditModal(rowIndex, deliveryDate, note) {
+    currentEditRowIndex = rowIndex;
+    document.getElementById('cheki-edit-delivery-date').value = deliveryDate || '';
+    document.getElementById('cheki-edit-note').value = note || '';
+    document.getElementById('cheki-edit-msg').textContent = '';
+    document.getElementById('cheki-edit-modal').classList.add('active');
+}
+
+function closeChekiEditModal() {
+    document.getElementById('cheki-edit-modal').classList.remove('active');
+    currentEditRowIndex = null;
+}
+
+async function submitChekiEdit() {
+    const deliveryDate = document.getElementById('cheki-edit-delivery-date').value;
+    const note = document.getElementById('cheki-edit-note').value.trim();
+    const msgEl = document.getElementById('cheki-edit-msg');
+    msgEl.textContent = '保存中...';
+    msgEl.className = 'msg msg-ok';
+
+    try {
+        const result = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'updateChekiDeliveryDate',
+                userId: lineProfile.userId,
+                rowIndex: currentEditRowIndex,
+                deliveryDate: deliveryDate,
+                note: note
+            })
+        }).then(r => r.json());
+
+        if (result.success) {
+            closeChekiEditModal();
+            await loadChekis();
+        } else {
+            msgEl.textContent = 'エラー: ' + (result.error || '失敗しました');
+            msgEl.className = 'msg msg-err';
+        }
+    } catch (e) {
+        msgEl.textContent = 'エラー: ' + e.message;
+        msgEl.className = 'msg msg-err';
+    }
+}
+        
         function openChekiModal() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('cheki-customer').value = '';
