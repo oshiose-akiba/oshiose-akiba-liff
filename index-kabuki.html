@@ -822,7 +822,7 @@
         }
 
         // ==========================================
-        // メイン
+        // メイン（遅延ロード版）
         // ==========================================
         async function main() {
             try {
@@ -834,47 +834,49 @@
                 if (!castResult.success) { showNotRegistered(); return; }
                 castData = castResult.data;
 
-                // 並列でデータ取得
-                await Promise.all([
-                    loadHomeAndShift(),
-                    loadBaseOrders(),
-                    loadChekis(),
-                    ]);
+                // ① まずホームの骨格を即描画（名前・タブ・空サマリーがすぐ出る）
+                renderHome();
+
+                // ② 各データを順次ロードし、届いたものから画面を埋める
+                loadAllSequentially();
 
             } catch (error) {
                 showError(error);
             }
         }
 
-        // ==========================================
-        // ホーム & シフト
-        // ==========================================
-        async function loadHomeAndShift() {
-    try {
-        const isManager = castData.isManager;
-        let shiftResult;
-
-        if (isManager) {
-            shiftResult = await fetch(`${GAS_URL}?action=getAllShifts`).then(r => r.json());
-        } else {
-            shiftResult = await fetch(`${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`).then(r => r.json());
+        // データを順次ロード（1つが遅くても画面表示はブロックしない）
+        async function loadAllSequentially() {
+            await loadShiftData();      // シフト（今日のシフト表示に必要）
+            await loadBaseOrders();     // BASE注文（サマリー数字）
+            await loadChekis();         // チェキ（サマリー数字）
+            await loadNotices();        // お知らせ
+            await loadMtgInfo();        // MTG
+            await loadShiftRequestForm(); // シフト希望提出フォーム（重いので最後）
         }
-        cachedShiftData = shiftResult;
 
-        renderHome();
-        renderShiftTab(isManager);
-        await loadShiftRequestForm();
-        updateHomeSummary();
+        // ==========================================
+        // シフトデータ取得（ホーム＆シフトタブ描画）
+        // ==========================================
+        async function loadShiftData() {
+            try {
+                const isManager = castData.isManager;
+                let shiftResult;
+                if (isManager) {
+                    shiftResult = await fetch(`${GAS_URL}?action=getAllShifts`).then(r => r.json());
+                } else {
+                    shiftResult = await fetch(`${GAS_URL}?action=getMyShifts&userId=${lineProfile.userId}`).then(r => r.json());
+                }
+                cachedShiftData = shiftResult;
 
-        // renderHome()でnotices-areaが生成された後に実行
-        await loadNotices();
-        
-        await loadMtgInfo();
-
-    } catch (e) {
-        document.getElementById('home-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
-    }
-}
+                renderHome();            // 今日のシフトが反映される
+                renderShiftTab(isManager);
+                updateHomeSummary();
+            } catch (e) {
+                const el = document.getElementById('shift-content');
+                if (el) el.innerHTML = `<div class="error">シフトの取得に失敗しました: ${escapeHtml(e.message)}</div>`;
+            }
+        }
 
         function renderHome() {
             const isManager = castData.isManager;
