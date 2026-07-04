@@ -1089,25 +1089,39 @@
 
         function renderShiftRequestForm() {
             const d = shiftRequestData;
+            const isArchived = d.isArchived === true;  // 閲覧専用モードか
             let html = '';
-            if (d.isAfterDeadline) {
+
+            if (isArchived) {
+                // 閲覧専用モード（アーカイブ済み＝確定作業中）
+                html += `<div class="deadline-info" style="background:#eef;border-left:4px solid #6366f1;">
+                    <strong>📁 提出は締め切られました</strong><br>
+                    以下はあなたが提出した内容です（変更はできません）。<br>
+                    <span style="font-size:11px;color:#999;">シフトが確定するまでお待ちください。</span>
+                </div>`;
+            } else if (d.isAfterDeadline) {
                 html += `<div class="warning-banner"><span class="big">⚠️ 提出期限を過ぎています ⚠️</span>提出は可能ですが、必ず期限内に提出するようお願いします${d.castLateCount > 0 ? `<div class="count">これまで ${d.castLateCount} 回 遅れています</div>` : ''}</div>`;
             } else if (d.castLateCount > 0) {
                 html += `<div class="warning-banner orange"><span class="big">⚠️ 過去の提出遅延について</span>これまで <span class="count">${d.castLateCount} 回</span> 期限を過ぎて提出しています<br>今回は期限内に提出をお願いします</div>`;
             }
-            html += `
-                <div class="deadline-info">
-                    対象: <strong>${d.period}</strong>分（${d.dates[0].label} 〜 ${d.dates[d.dates.length - 1].label}）<br>
-                    📅 締切: <strong>${d.deadlineLabel}</strong>
-                    <div style="font-size:11px;color:#999;margin-top:4px;">出勤しない日は「--」のままにしてください。締切までは何度でも修正可能です。</div>
-                </div>
-                <div id="shift-rows">
-            `;
+
+            if (!isArchived) {
+                html += `
+                    <div class="deadline-info">
+                        対象: <strong>${d.period}</strong>分（${d.dates[0].label} 〜 ${d.dates[d.dates.length - 1].label}）<br>
+                        📅 締切: <strong>${d.deadlineLabel}</strong>
+                        <div style="font-size:11px;color:#999;margin-top:4px;">出勤しない日は「--」のままにしてください。締切までは何度でも修正可能です。</div>
+                    </div>
+                `;
+            }
+
+            html += `<div id="shift-rows">`;
             d.dates.forEach((date, i) => {
                 const existing = d.existingShifts[i] || '';
                 const parts = existing.split('-');
                 const startVal = parts[0] || '';
                 const endVal = parts[1] || '';
+                const disabledAttr = isArchived ? 'disabled' : '';
                 html += `
                     <div class="day-row ${date.isWeekend ? 'weekend' : ''}">
                         <div class="day-label">
@@ -1115,26 +1129,37 @@
                             ${date.hours ? `<span class="hours-tag">${escapeHtml(date.hours)}</span>` : ''}
                             ${date.event ? `<span class="event-tag">${escapeHtml(date.event)}</span>` : ''}
                         </div>
-                        <select class="shift-start" data-idx="${i}">
+                        <select class="shift-start" data-idx="${i}" ${disabledAttr}>
                             <option value="">--</option>
                             ${d.timeOptions.map(t => `<option value="${t}" ${startVal === t ? 'selected' : ''}>${t}</option>`).join('')}
                         </select>
                         <span class="tilde">〜</span>
-                        <select class="shift-end" data-idx="${i}">
+                        <select class="shift-end" data-idx="${i}" ${disabledAttr}>
                             <option value="">--</option>
                             ${d.timeOptions.map(t => `<option value="${t}" ${endVal === t ? 'selected' : ''}>${t}</option>`).join('')}
                         </select>
-                        <button type="button" class="clear-btn" onclick="clearShiftRow(${i})">×</button>
+                        ${isArchived ? '' : `<button type="button" class="clear-btn" onclick="clearShiftRow(${i})">×</button>`}
                     </div>
                 `;
             });
-            html += `</div>
-                <label class="note-label">備考（自由記入）</label>
-                <textarea class="note-input" id="shift-note" placeholder="例: 通院のため遅れる可能性あり">${escapeHtml(d.existingNote || '')}</textarea>
-                <div style="font-size:11px;color:#888;margin-top:4px;">伝えたいことがあれば自由に記入してください。</div>
-                <button class="submit-btn" id="shift-submit-btn" onclick="submitShiftRequest()">提出する</button>
-                <div class="msg" id="shift-submit-msg"></div>
-            `;
+            html += `</div>`;
+
+            if (isArchived) {
+                // 閲覧専用：備考は読み取り表示のみ、提出ボタンなし
+                html += `
+                    <label class="note-label">備考</label>
+                    <div class="note-input" style="background:#f5f5f5;color:#666;min-height:auto;white-space:pre-wrap;">${escapeHtml(d.existingNote || '（なし）')}</div>
+                `;
+            } else {
+                html += `
+                    <label class="note-label">備考（自由記入）</label>
+                    <textarea class="note-input" id="shift-note" placeholder="例: 通院のため遅れる可能性あり">${escapeHtml(d.existingNote || '')}</textarea>
+                    <div style="font-size:11px;color:#888;margin-top:4px;">伝えたいことがあれば自由に記入してください。</div>
+                    <button class="submit-btn" id="shift-submit-btn" onclick="submitShiftRequest()">提出する</button>
+                    <div class="msg" id="shift-submit-msg"></div>
+                `;
+            }
+
             document.getElementById('shift-request-content').innerHTML = html;
             document.getElementById('shift-request-content').classList.remove('loading');
         }
