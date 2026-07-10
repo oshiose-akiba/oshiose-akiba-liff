@@ -767,17 +767,25 @@
         // ==========================================
         // メイン
         // ==========================================
+        // ★ getInitData(大阪=4項目) の結果を保持し、各 loadXxx が参照する
+        let initData = null;
+
         async function main() {
             try {
                 await liff.init({ liffId: LIFF_ID });
                 if (!liff.isLoggedIn()) { liff.login(); return; }
 
                 lineProfile = await liff.getProfile();
-                const castResult = await fetch(`${GAS_URL}?action=getCastInfo&userId=${lineProfile.userId}`).then(r => r.json());
-                if (!castResult.success) { showNotRegistered(); return; }
-                castData = castResult.data;
 
-                // 並列でデータ取得
+                // ★ 起動時は getInitData 1本で cast＋BASE＋チェキ＋お知らせ をまとめて取得（往復4→1）
+                //   大阪はシフト/MTGを持たないので4項目版。
+                const init = await fetch(`${GAS_URL}?action=getInitData&userId=${lineProfile.userId}`).then(r => r.json());
+                if (!init.success) { showNotRegistered(); return; }
+
+                initData = init.data;
+                castData = initData.cast;
+
+                // 各レーンは initData を使って描画（追加往復なし）。
                 await Promise.all([
                     loadHomeOnly(),
                     loadBaseOrders(),
@@ -818,8 +826,13 @@
 }
       async function loadHomeOnly() {
     try {
-        renderHomeOsaka();
-        await loadNotices();
+        renderHomeOsaka();   // ここで notices-area が生成される
+        // お知らせ：getInitData のデータで描画。無ければ従来のloadNoticesにフォールバック。
+        if (initData && initData.notices) {
+            renderNotices(initData.notices);
+        } else {
+            await loadNotices();
+        }
     } catch (e) {
         document.getElementById('home-content').innerHTML = 
             `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
@@ -1148,10 +1161,18 @@ function renderHomeOsaka() {
         // ==========================================
         async function loadBaseOrders() {
             try {
-                const result = await fetch(`${GAS_URL}?action=getBaseOrders&userId=${lineProfile.userId}`).then(r => r.json());
-                if (!result.success) {
-                    document.getElementById('base-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                let result;
+                if (initData && initData.orders) {
+                    result = { success: true, pending: initData.orders.pending, thisMonth: initData.orders.thisMonth, baseName: initData.orders.baseName };
+                } else if (initData && initData.ordersError) {
+                    document.getElementById('base-content').innerHTML = `<div class="error">${escapeHtml(initData.ordersError)}</div>`;
                     return;
+                } else {
+                    result = await fetch(`${GAS_URL}?action=getBaseOrders&userId=${lineProfile.userId}`).then(r => r.json());
+                    if (!result.success) {
+                        document.getElementById('base-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                        return;
+                    }
                 }
                 cachedBaseData = result;
                 renderBaseOrders(result);
@@ -1259,13 +1280,22 @@ function renderHomeOsaka() {
         // ==========================================
         async function loadChekis() {
             try {
-                const result = await fetch(`${GAS_URL}?action=getMyChekis&userId=${lineProfile.userId}`).then(r => r.json());
-                if (!result.success) {
-                    document.getElementById('cheki-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                let chekiData;
+                if (initData && initData.chekis) {
+                    chekiData = initData.chekis;
+                } else if (initData && initData.chekisError) {
+                    document.getElementById('cheki-content').innerHTML = `<div class="error">${escapeHtml(initData.chekisError)}</div>`;
                     return;
+                } else {
+                    const result = await fetch(`${GAS_URL}?action=getMyChekis&userId=${lineProfile.userId}`).then(r => r.json());
+                    if (!result.success) {
+                        document.getElementById('cheki-content').innerHTML = `<div class="error">${escapeHtml(result.error || '取得に失敗しました')}</div>`;
+                        return;
+                    }
+                    chekiData = result.data;
                 }
-                cachedChekiData = result.data;
-                renderChekis(result.data);
+                cachedChekiData = chekiData;
+                renderChekis(chekiData);
                 updateHomeSummary();
             } catch (e) {
                 document.getElementById('cheki-content').innerHTML = `<div class="error">エラー: ${escapeHtml(e.message)}</div>`;
@@ -1703,4 +1733,3 @@ async function deleteNotice(rowIndex) {
     </script>
 </body>
 </html>
-
