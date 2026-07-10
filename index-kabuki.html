@@ -830,29 +830,87 @@
                 if (!liff.isLoggedIn()) { liff.login(); return; }
 
                 lineProfile = await liff.getProfile();
-                const castResult = await fetch(`${GAS_URL}?action=getCastInfo&userId=${lineProfile.userId}`).then(r => r.json());
-                if (!castResult.success) { showNotRegistered(); return; }
-                castData = castResult.data;
+
+                // ★ 起動時は getInitData 1本で cast＋シフト＋BASE＋チェキ＋お知らせ＋MTG をまとめて取得（往復6→1）
+                const init = await fetch(`${GAS_URL}?action=getInitData&userId=${lineProfile.userId}`).then(r => r.json());
+                if (!init.success) { showNotRegistered(); return; }
+
+                const d = init.data;
+                castData = d.cast;
 
                 // ① まずホームの骨格を即描画（名前・タブ・空サマリーがすぐ出る）
                 renderHome();
 
-                // ② 各データを順次ロードし、届いたものから画面を埋める
-                loadAllSequentially();
+                // ② getInitData に入っていたデータを各キャッシュへ配って描画（追加の往復なし）
+                distributeInitData(d);
+
+                // ③ getInitData に含めていない/含められなかったものだけ個別ロード（フォールバック）
+                loadRemaining(d);
 
             } catch (error) {
                 showError(error);
             }
         }
 
-        // データを順次ロード（1つが遅くても画面表示はブロックしない）
-        async function loadAllSequentially() {
-            await loadShiftData();      // シフト（今日のシフト表示に必要）
-            await loadBaseOrders();     // BASE注文（サマリー数字）
-            await loadChekis();         // チェキ（サマリー数字）
-            await loadNotices();        // お知らせ
-            await loadMtgInfo();        // MTG
-            await loadShiftRequestForm(); // シフト希望提出フォーム（重いので最後）
+        // getInitData の結果を既存の各 cachedXxx に配って描画する。
+        // 各 render 関数は従来通り（getInitData由来か個別fetch由来かを意識しない）。
+        function distributeInitData(d) {
+            const isManager = castData.isManager;
+
+            // --- シフト ---
+            // 一般キャスト：getInitData の shifts が getMyShifts と同形（{cast,current,next}）なのでそのまま使える。
+            // 管理者：ここには自分視点の shifts しか無い。全体表(getAllShifts)は loadRemaining で別途取得する。
+            if (!isManager && d.shifts) {
+                cachedShiftData = { success: true, data: d.shifts };
+                renderHome();               // 今日のシフト反映
+                renderShiftTab(false);
+            }
+
+            // --- BASE注文 ---
+            if (d.orders) {
+                // getBaseOrders は success 直下に pending/thisMonth/baseName を持つ形。renderBaseOrders もその形を読む。
+                cachedBaseData = { success: true, pending: d.orders.pending, thisMonth: d.orders.thisMonth, baseName: d.orders.baseName };
+                renderBaseOrders(cachedBaseData);
+            } else if (d.ordersError) {
+                const el = document.getElementById('base-content');
+                if (el) el.innerHTML = `<div class="error">${escapeHtml(d.ordersError)}</div>`;
+            }
+
+            // --- チェキ ---
+            if (d.chekis) {
+                cachedChekiData = d.chekis;
+                renderChekis(d.chekis);
+            }
+
+            // --- お知らせ ---
+            if (d.notices) {
+                renderNotices(d.notices);
+            }
+
+            // --- MTG ---
+            if (d.mtg) {
+                renderMtgCard(d.mtg);
+            }
+
+            updateHomeSummary();
+        }
+
+        // getInitData で賄えないものだけを追加ロードする。
+        function loadRemaining(d) {
+            // 管理者は全体シフト表(getAllShifts)が必要。重いのでここで別途1本だけ取得。
+            if (castData.isManager) {
+                loadShiftData();  // 既存関数：manager分岐で getAllShifts を叩き、renderShiftTab(true) まで実行
+            }
+
+            // getInitData 側で個別にコケた項目があれば、対応する既存loaderで取り直す（保険）。
+            if (!castData.isManager && !d.shifts && d.shiftsError) loadShiftData();
+            if (!d.orders && d.ordersError) loadBaseOrders();
+            if (!d.chekis && d.chekisError) loadChekis();
+            if (!d.notices && d.noticesError) loadNotices();
+            if (!d.mtg && d.mtgError) loadMtgInfo();
+
+            // シフト希望提出フォームは getInitData に含めていない（重い＆締切判定を持つ）ので従来通り遅延ロード。
+            loadShiftRequestForm();
         }
 
         // ==========================================
