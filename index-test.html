@@ -824,27 +824,75 @@
         // ==========================================
         // メイン（遅延ロード版）
         // ==========================================
+        // ★ SWR用：localStorage のキー（店舗ごとに分ける。3店が同一ドメインでも衝突しない）
+        const CACHE_KEY = 'initData_kabuki';
+
+        // キャッシュを読む。userIdが一致しない場合は使わない（共用端末で別人のデータを見せないため）
+        function loadCache(userId) {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const c = JSON.parse(raw);
+                if (!c || !c.userId || c.userId !== userId) return null;  // 別人のキャッシュは破棄
+                if (!c.data || !c.data.cast) return null;
+                return c.data;
+            } catch (e) {
+                return null;  // 壊れていたら無視
+            }
+        }
+
+        function saveCache(userId, data) {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ userId: userId, data: data, savedAt: Date.now() }));
+            } catch (e) {
+                // 容量超過等。キャッシュできなくても動作に影響はないので握りつぶす
+            }
+        }
+
+        // キャッシュが古いまま残るのを防ぐ仕組みは意図的に入れていない。
+        // 理由：起動のたびに裏で getInitData を叩いて最新を保存し直すため、
+        //       古いキャッシュは最大でも「起動直後の1〜2秒だけ表示される」で自然に解消する。
+        //       （書き込み後は既存の loadChekis() 等が画面を更新するので、その場の表示は正しい）
+
         async function main() {
             try {
                 await liff.init({ liffId: LIFF_ID });
                 if (!liff.isLoggedIn()) { liff.login(); return; }
 
                 lineProfile = await liff.getProfile();
+                const userId = lineProfile.userId;
 
-                // ★ 起動時は getInitData 1本で cast＋シフト＋BASE＋チェキ＋お知らせ＋MTG をまとめて取得（往復6→1）
-                const init = await fetch(`${GAS_URL}?action=getInitData&userId=${lineProfile.userId}`).then(r => r.json());
-                if (!init.success) { showNotRegistered(); return; }
+                // ===== SWR ① まず前回のキャッシュで即描画（fetchを待たない＝体感ゼロ秒）=====
+                const cached = loadCache(userId);
+                if (cached) {
+                    castData = cached.cast;
+                    renderHome();
+                    distributeInitData(cached);
+                    // loadRemaining はここでは呼ばない（管理者のgetAllShifts等が二重に走るため）。
+                    // 最新データが来た後に一度だけ実行する。
+                }
+
+                // ===== SWR ② 裏で最新を取得して差し替え =====
+                const init = await fetch(`${GAS_URL}?action=getInitData&userId=${userId}`).then(r => r.json());
+
+                if (!init.success) {
+                    // キャッシュで既に画面が出ている場合は、それを消してまで未登録画面にしない。
+                    // （通信エラー等の一時的失敗で、表示中の画面が壊れるのを防ぐ）
+                    if (!cached) showNotRegistered();
+                    return;
+                }
 
                 const d = init.data;
                 castData = d.cast;
 
-                // ① まずホームの骨格を即描画（名前・タブ・空サマリーがすぐ出る）
-                renderHome();
+                // 最新データを保存（次回起動の即描画用）
+                saveCache(userId, d);
 
-                // ② getInitData に入っていたデータを各キャッシュへ配って描画（追加の往復なし）
+                // 最新データで描き直す（キャッシュ表示中なら静かに差し替わる）
+                renderHome();
                 distributeInitData(d);
 
-                // ③ getInitData に含めていない/含められなかったものだけ個別ロード（フォールバック）
+                // getInitData に含めていない/含められなかったものだけ個別ロード（フォールバック）
                 loadRemaining(d);
 
             } catch (error) {
