@@ -1146,7 +1146,10 @@
 
         function renderShiftRequestForm() {
             const d = shiftRequestData;
-            const isArchived = d.isArchived === true;  // 閲覧専用モードか
+            const isArchived = d.isArchived === true;  // 閲覧専用（アーカイブ済み＝確定作業中）
+            const isLocked = d.isLocked === true;      // 締切+24時間ロック
+            // 編集不可＝アーカイブ or ロックのどちらか
+            const readOnly = isArchived || isLocked;
             let html = '';
 
             if (isArchived) {
@@ -1155,13 +1158,19 @@
                     以下はあなたが提出した内容です（変更はできません）。<br>
                     <span style="font-size:11px;color:#999;">シフトが確定するまでお待ちください。</span>
                 </div>`;
+            } else if (isLocked) {
+                html += `<div class="warning-banner" style="background:#616161;">
+                    <span class="big">🔒 受付終了</span>
+                    提出期間が終了したため、提出・変更はできません。<br>
+                    変更が必要な場合は店舗までご連絡ください。
+                </div>`;
             } else if (d.isAfterDeadline) {
                 html += `<div class="warning-banner"><span class="big">⚠️ 提出期限を過ぎています ⚠️</span>提出は可能ですが、必ず期限内に提出するようお願いします${d.castLateCount > 0 ? `<div class="count">これまで ${d.castLateCount} 回 遅れています</div>` : ''}</div>`;
             } else if (d.castLateCount > 0) {
                 html += `<div class="warning-banner orange"><span class="big">⚠️ 過去の提出遅延について</span>これまで <span class="count">${d.castLateCount} 回</span> 期限を過ぎて提出しています<br>今回は期限内に提出をお願いします</div>`;
             }
 
-            if (!isArchived) {
+            if (!readOnly) {
                 html += `
                     <div class="deadline-info">
                         対象: <strong>${d.period}</strong>分（${d.dates[0].label} 〜 ${d.dates[d.dates.length - 1].label}）<br>
@@ -1177,7 +1186,7 @@
                 const parts = existing.split('-');
                 const startVal = parts[0] || '';
                 const endVal = parts[1] || '';
-                const disabledAttr = isArchived ? 'disabled' : '';
+                const disabledAttr = readOnly ? 'disabled' : '';
                 html += `
                     <div class="day-row ${date.isWeekend ? 'weekend' : ''}">
                         <div class="day-label">
@@ -1194,13 +1203,14 @@
                             <option value="">--</option>
                             ${d.timeOptions.map(t => `<option value="${t}" ${endVal === t ? 'selected' : ''}>${t}</option>`).join('')}
                         </select>
-                        ${isArchived ? '' : `<button type="button" class="clear-btn" onclick="clearShiftRow(${i})">×</button>`}
+                        ${readOnly ? '' : `<button type="button" class="clear-btn" onclick="clearShiftRow(${i})">×</button>`}
                     </div>
                 `;
             });
             html += `</div>`;
 
-            if (isArchived) {
+            if (readOnly) {
+                // 閲覧のみ：備考は読み取り表示、提出ボタンなし
                 html += `
                     <label class="note-label">備考</label>
                     <div class="note-input" style="background:#f5f5f5;color:#666;min-height:auto;white-space:pre-wrap;">${escapeHtml(d.existingNote || '（なし）')}</div>
@@ -1214,11 +1224,9 @@
                     <div class="msg" id="shift-submit-msg"></div>
                 `;
             }
-
             document.getElementById('shift-request-content').innerHTML = html;
             document.getElementById('shift-request-content').classList.remove('loading');
         }
-
         function clearShiftRow(idx) {
             document.querySelectorAll(`[data-idx="${idx}"]`).forEach(el => el.value = '');
         }
