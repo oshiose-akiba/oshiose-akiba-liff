@@ -1673,15 +1673,15 @@ function deleteChekiConfirm() {
         }
 
         function getStatusTag(status) {
-            const tags = {
-                leader: '<span class="shift-tag tag-leader">🟢 リーダー</span>',
-                kabuki_help: '<span class="shift-tag tag-kabuki_help">🟣 AKIBAヘルプ</span>',
-                absent: '<span class="shift-tag tag-absent">🔴 当日欠勤</span>',
-                late: '<span class="shift-tag tag-late">🟪 遅刻</span>',
-                normal: ''
-            };
-            return tags[status] || '';
-        }
+  const tags = {
+    leader: '⭐',
+    kabuki_help: 'AKIBA',
+    absent: '',
+    late: '',
+    normal: ''
+  };
+  return tags[status] || '';
+}
 
         function toggleDay(dayId) {
             document.getElementById(`${dayId}-body`).classList.toggle('open');
