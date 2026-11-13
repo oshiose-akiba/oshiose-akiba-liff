@@ -1316,7 +1316,7 @@
             const isDone = order.handleStatus === '対応済み' || order.handleStatus === '対応不要';
             const subtotalDisplay = (order.subtotal && !isNaN(Number(order.subtotal)) && Number(order.subtotal) > 0) ? '¥' + Number(order.subtotal).toLocaleString() : '¥-';
             const btnHtml = isDone ? `<button class="base-handle-btn done-btn" disabled>✓ 対応済み</button>`
-                : showBtn ? `<button class="base-handle-btn" onclick="markHandled(this, ${order.rowIndex})">対応完了にする</button>` : '';
+                : showBtn ? `<button class="base-handle-btn" data-row="${order.rowIndex}" data-oid="${escapeHtml(order.orderId)}" data-pname="${escapeHtml(order.productName)}" onclick="markHandled(this)">対応完了にする</button>` : '';
             const noteHtml = order.note ? `<div class="base-order-note">📝 ${escapeHtml(order.note)}</div>` : '';
             return `
                 <div class="base-order-card ${isDone ? 'done' : paymentClass}" id="order-card-${order.rowIndex}">
@@ -1338,14 +1338,17 @@
             document.getElementById(`bpanel-${tab}`).classList.add('active');
         }
 
-        async function markHandled(btn, rowIndex) {
+        async function markHandled(btn) {
+            const rowIndex = Number(btn.dataset.row);
+            const orderId = btn.dataset.oid || '';
+            const productName = btn.dataset.pname || '';
             showModal('この注文を対応済みにしますか？', async () => {
                 btn.disabled = true; btn.textContent = '送信中...';
                 try {
                     const result = await fetch(GAS_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'markBaseOrderHandled', userId: lineProfile.userId, rowIndex })
+                        body: JSON.stringify({ action: 'markBaseOrderHandled', userId: lineProfile.userId, rowIndex, orderId, productName })
                     }).then(r => r.json());
                     if (result.success) {
                         const card = document.getElementById(`order-card-${rowIndex}`);
@@ -1356,7 +1359,6 @@
                                 card.style.opacity = ''; card.style.transform = '';
                                 btn.className = 'base-handle-btn done-btn';
                                 btn.disabled = true; btn.textContent = '✓ 対応済み';
-                                // キャッシュ更新
                                 if (cachedBaseData) {
                                     cachedBaseData.pending = (cachedBaseData.pending || []).filter(o => o.rowIndex !== rowIndex);
                                 }
